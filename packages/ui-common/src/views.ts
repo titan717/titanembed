@@ -5,8 +5,15 @@ import { t, type StringKey } from "./i18n";
 
 export type Mode = "tv" | "mobile";
 
-export function button(label: string, opts: { icon?: Parameters<typeof icon>[0]; primary?: boolean; cls?: string; onClick: () => void; aria?: string }) {
-  const b = h("button", { type: "button", class: `t-btn${opts.primary ? " is-primary" : ""}${opts.cls ? " " + opts.cls : ""}`, "aria-label": opts.aria ?? null });
+export function button(
+  label: string,
+  opts: { icon?: Parameters<typeof icon>[0]; primary?: boolean; cls?: string; onClick: () => void; aria?: string }
+) {
+  const b = h("button", {
+    type: "button",
+    class: `t-btn${opts.primary ? " is-primary" : ""}${opts.cls ? " " + opts.cls : ""}`,
+    "aria-label": opts.aria ?? null
+  });
   if (opts.icon) b.appendChild(icon(opts.icon));
   if (label) b.appendChild(h("span", { class: "t-btn-label" }, label));
   b.addEventListener("click", (e) => {
@@ -81,11 +88,21 @@ export class StateViews {
       "div",
       { class: "t-loading", role: "status", "aria-label": t("loading") },
       this.loadingArt,
-      h("div", { class: "t-loading-center" }, h("div", { class: "t-loading-brand" }), this.loadingTitle, h("div", { class: "t-ring-spin", "aria-hidden": "true" }))
+      h(
+        "div",
+        { class: "t-loading-center" },
+        h("div", { class: "t-loading-brand" }),
+        this.loadingTitle,
+        h("div", { class: "t-ring-spin", "aria-hidden": "true" })
+      )
     );
 
     // buffering
-    this.buffering = h("div", { class: "t-buffering", role: "status", "aria-label": t("buffering") }, h("div", { class: "t-ring-spin", "aria-hidden": "true" }));
+    this.buffering = h(
+      "div",
+      { class: "t-buffering", role: "status", "aria-label": t("buffering") },
+      h("div", { class: "t-ring-spin", "aria-hidden": "true" })
+    );
 
     // error
     this.errorBody = h("p", { class: "t-modal-body" });
@@ -101,7 +118,12 @@ export class StateViews {
         h("h2", { class: "t-modal-title", id: "t-error-title" }, t("errorTitle")),
         this.errorBody,
         this.errorCode,
-        h("div", { class: "t-modal-actions" }, button(t("retry"), { icon: "retry", primary: true, onClick: () => this.core.retry() }), this.errorAnother)
+        h(
+          "div",
+          { class: "t-modal-actions" },
+          button(t("retry"), { icon: "retry", primary: true, onClick: () => this.core.retry() }),
+          this.errorAnother
+        )
       )
     );
 
@@ -114,15 +136,29 @@ export class StateViews {
         "div",
         { class: "t-modal-card" },
         h("h2", { class: "t-modal-title", id: "t-resume-title" }, t("resumeTitle")),
-        h("div", { class: "t-modal-actions" }, this.resumeBtn, button(t("startOver"), { icon: "retry", onClick: () => this.answerResume(false) }))
+        h(
+          "div",
+          { class: "t-modal-actions" },
+          this.resumeBtn,
+          button(t("startOver"), { icon: "retry", onClick: () => this.answerResume(false) })
+        )
       )
     );
 
     // offline
-    this.offline = h("div", { class: "t-offline", role: "status" }, icon("offline"), h("div", null, h("strong", null, t("offlineTitle")), h("span", null, t("offlineBody"))));
+    this.offline = h(
+      "div",
+      { class: "t-offline", role: "status" },
+      icon("offline"),
+      h("div", null, h("strong", null, t("offlineTitle")), h("span", null, t("offlineBody")))
+    );
 
     // autoplay-muted prompt
-    this.unmute = button(mode === "tv" ? t("pressToUnmute") : t("tapToUnmute"), { icon: "mute", cls: "t-unmute", onClick: () => this.core.userGesture() });
+    this.unmute = button(mode === "tv" ? t("pressToUnmute") : t("tapToUnmute"), {
+      icon: "mute",
+      cls: "t-unmute",
+      onClick: () => this.core.userGesture()
+    });
 
     // skip
     this.skip = h("button", { type: "button", class: "t-skip" });
@@ -166,7 +202,16 @@ export class StateViews {
         h(
           "div",
           { class: "t-next-actions" },
-          h("button", { type: "button", class: "t-btn is-primary t-next-play", onclick: ((e: Event) => (e.stopPropagation(), this.playNext(false))) as EventListener }, h("span", { class: "t-countdown-wrap" }, svg, this.nextCount), h("span", { class: "t-btn-label" }, t("playNow"))),
+          h(
+            "button",
+            {
+              type: "button",
+              class: "t-btn is-primary t-next-play",
+              onclick: ((e: Event) => (e.stopPropagation(), this.playNext(false))) as EventListener
+            },
+            h("span", { class: "t-countdown-wrap" }, svg, this.nextCount),
+            h("span", { class: "t-btn-label" }, t("playNow"))
+          ),
           button(t("cancel"), { onClick: () => this.cancelNext() })
         )
       )
@@ -177,54 +222,89 @@ export class StateViews {
     this.ended = h(
       "div",
       { class: "t-modal t-ended", role: "dialog", "aria-modal": "true", "aria-labelledby": "t-ended-title" },
-      h("div", { class: "t-modal-card" }, h("h2", { class: "t-modal-title", id: "t-ended-title" }, t("ended")), h("div", { class: "t-modal-actions" }, this.endedNext, button(t("replay"), { icon: "retry", onClick: () => (this.core.seek(0), void this.core.play()) })))
+      h(
+        "div",
+        { class: "t-modal-card" },
+        h("h2", { class: "t-modal-title", id: "t-ended-title" }, t("ended")),
+        h(
+          "div",
+          { class: "t-modal-actions" },
+          this.endedNext,
+          button(t("replay"), { icon: "retry", onClick: () => (this.core.seek(0), void this.core.play()) })
+        )
+      )
     );
 
     this.advisory = h("div", { class: "t-advisory", "aria-live": "polite" });
     this.toastEl = h("div", { class: "t-toast", role: "status", "aria-live": "polite" });
 
-    root.append(this.loading, this.buffering, this.advisory, this.skip, this.unmute, this.nextUp, this.offline, this.resume, this.error, this.ended, this.toastEl);
+    root.append(
+      this.loading,
+      this.buffering,
+      this.advisory,
+      this.skip,
+      this.unmute,
+      this.nextUp,
+      this.offline,
+      this.resume,
+      this.error,
+      this.ended,
+      this.toastEl
+    );
     this.bind();
   }
 
   private bind() {
     const c = this.core;
-    this.bag.add(c.on("load", ({ media }) => {
-      this.hideAll();
-      this.advisoryShown = false;
-      this.nextCancelled = false;
-      while (this.loadingArt.firstChild) this.loadingArt.removeChild(this.loadingArt.firstChild);
-      const art = img(media.backdrop ?? media.poster, "", "t-img");
-      if (art) this.loadingArt.appendChild(art);
-      const brand = this.loading.querySelector(".t-loading-brand")!;
-      while (brand.firstChild) brand.removeChild(brand.firstChild);
-      const logo = img(media.logo, media.title, "t-loading-logo");
-      brand.appendChild(logo ?? mark());
-      text(this.loadingTitle, logo ? "" : media.title);
-      cls(this.loading, "is-on", true);
-    }));
+    this.bag.add(
+      c.on("load", ({ media }) => {
+        this.hideAll();
+        this.advisoryShown = false;
+        this.nextCancelled = false;
+        while (this.loadingArt.firstChild) this.loadingArt.removeChild(this.loadingArt.firstChild);
+        const art = img(media.backdrop ?? media.poster, "", "t-img");
+        if (art) this.loadingArt.appendChild(art);
+        const brand = this.loading.querySelector(".t-loading-brand")!;
+        while (brand.firstChild) brand.removeChild(brand.firstChild);
+        const logo = img(media.logo, media.title, "t-loading-logo");
+        brand.appendChild(logo ?? mark());
+        text(this.loadingTitle, logo ? "" : media.title);
+        cls(this.loading, "is-on", true);
+      })
+    );
     this.bag.add(c.on("statechange", ({ state }) => this.onState(state)));
-    this.bag.add(c.on("error", (e) => {
-      text(this.errorBody, e.message);
-      text(this.errorCode, e.code);
-      this.errorAnother.hidden = !c.canTryAnother;
-      cls(this.loading, "is-on", false);
-      if (e.code === "E_OFFLINE") cls(this.offline, "is-on", true);
-      this.setModal(this.error);
-    }));
-    this.bag.add(c.on("resumeprompt", ({ time }) => {
-      text(this.resumeBtn.querySelector(".t-btn-label") ?? this.resumeBtn.appendChild(h("span", { class: "t-btn-label" })), t("resumeFrom", { t: clock(time) }));
-      this.setModal(this.resume);
-    }));
+    this.bag.add(
+      c.on("error", (e) => {
+        text(this.errorBody, e.message);
+        text(this.errorCode, e.code);
+        this.errorAnother.hidden = !c.canTryAnother;
+        cls(this.loading, "is-on", false);
+        if (e.code === "E_OFFLINE") cls(this.offline, "is-on", true);
+        this.setModal(this.error);
+      })
+    );
+    this.bag.add(
+      c.on("resumeprompt", ({ time }) => {
+        text(
+          this.resumeBtn.querySelector(".t-btn-label") ?? this.resumeBtn.appendChild(h("span", { class: "t-btn-label" })),
+          t("resumeFrom", { t: clock(time) })
+        );
+        this.setModal(this.resume);
+      })
+    );
     this.bag.add(c.on("autoplaymuted", () => cls(this.unmute, "is-on", true)));
-    this.bag.add(c.on("volumechange", ({ muted }) => {
-      if (!muted || !c.mutedByPolicy) cls(this.unmute, "is-on", false);
-    }));
+    this.bag.add(
+      c.on("volumechange", ({ muted }) => {
+        if (!muted || !c.mutedByPolicy) cls(this.unmute, "is-on", false);
+      })
+    );
     this.bag.add(c.on("markers", ({ active }) => this.showSkip(active?.type ?? null)));
     this.bag.add(c.on("nextup", ({ next }) => this.showNext(next)));
-    this.bag.add(c.on("seeking", () => {
-      if (this.nextTimer && c.time < c.duration - 30) this.cancelNext(true);
-    }));
+    this.bag.add(
+      c.on("seeking", () => {
+        if (this.nextTimer && c.time < c.duration - 30) this.cancelNext(true);
+      })
+    );
     const on = () => cls(this.offline, "is-on", false);
     const off = () => cls(this.offline, "is-on", true);
     this.bag.on(window, "online", on);
@@ -337,7 +417,9 @@ export class StateViews {
     this.ring.style.strokeDashoffset = String(len * (1 - this.nextLeft / StateViews.NEXT_SECONDS));
     if (reducedMotion()) this.ring.style.transition = "none";
     text(this.nextCount, String(Math.max(0, this.nextLeft)));
-    this.nextUp.querySelector(".t-next-play")?.setAttribute("aria-label", `${t("playNow")}, ${t("nextIn", { n: Math.max(0, this.nextLeft) })}`);
+    this.nextUp
+      .querySelector(".t-next-play")
+      ?.setAttribute("aria-label", `${t("playNow")}, ${t("nextIn", { n: Math.max(0, this.nextLeft) })}`);
   }
 
   private playNext(auto: boolean) {
@@ -371,7 +453,15 @@ export class StateViews {
     if (this.advisoryShown || !m?.rating) return;
     this.advisoryShown = true;
     while (this.advisory.firstChild) this.advisory.removeChild(this.advisory.firstChild);
-    this.advisory.append(h("span", { class: "t-advisory-bar", "aria-hidden": "true" }), h("div", null, h("p", { class: "t-advisory-rating" }, `Rated ${m.rating}`), m.advisory ? h("p", { class: "t-advisory-desc" }, m.advisory) : null));
+    this.advisory.append(
+      h("span", { class: "t-advisory-bar", "aria-hidden": "true" }),
+      h(
+        "div",
+        null,
+        h("p", { class: "t-advisory-rating" }, `Rated ${m.rating}`),
+        m.advisory ? h("p", { class: "t-advisory-desc" }, m.advisory) : null
+      )
+    );
     cls(this.advisory, "is-on", true);
     setTimeout(() => cls(this.advisory, "is-on", false), 6000);
   }

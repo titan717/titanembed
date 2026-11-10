@@ -11,7 +11,19 @@ import type {
   ThemeInput
 } from "../../core/src/types";
 
-export type { AudioTrack, Marker, MediaDescriptor, PlayerClass, PlayerError, PlayerState, Quality, TextTrack, ThemeInput, EventName, CommandName };
+export type {
+  AudioTrack,
+  Marker,
+  MediaDescriptor,
+  PlayerClass,
+  PlayerError,
+  PlayerState,
+  Quality,
+  TextTrack,
+  ThemeInput,
+  EventName,
+  CommandName
+};
 
 declare const __TITAN_VERSION__: string;
 export const VERSION: string = typeof __TITAN_VERSION__ === "string" ? __TITAN_VERSION__ : "0.0.0";
@@ -190,7 +202,16 @@ export function createPlayer(container: HTMLElement | string, options: PlayerOpt
 
   const onMessage = (e: MessageEvent) => {
     if (e.source !== frame.contentWindow || e.origin !== embedOrigin) return;
-    const m = e.data as { ns?: unknown; v?: unknown; type?: unknown; event?: unknown; data?: unknown; id?: unknown; ok?: unknown; error?: unknown };
+    const m = e.data as {
+      ns?: unknown;
+      v?: unknown;
+      type?: unknown;
+      event?: unknown;
+      data?: unknown;
+      id?: unknown;
+      ok?: unknown;
+      error?: unknown;
+    };
     if (!m || typeof m !== "object" || m.ns !== NS || m.v !== PROTOCOL_VERSION) return;
     if (m.type === "event" && typeof m.event === "string") {
       if (m.event === "ready") resolveReady(m.data as EventMap["ready"]);
@@ -240,10 +261,30 @@ export function createPlayer(container: HTMLElement | string, options: PlayerOpt
         wrap.classList.toggle("titan-embed--mini", mini);
         if (mini) {
           wrap.style.height = `${wrap.offsetHeight}px`;
-          Object.assign(frame.style, { position: "fixed", right: "12px", bottom: "12px", width: "min(60vw, 320px)", height: "auto", aspectRatio: "16 / 9", zIndex: "2147483000", borderRadius: "8px", boxShadow: "0 8px 24px rgba(0,0,0,.4)" });
+          Object.assign(frame.style, {
+            position: "fixed",
+            right: "12px",
+            bottom: "12px",
+            width: "min(60vw, 320px)",
+            height: "auto",
+            aspectRatio: "16 / 9",
+            zIndex: "2147483000",
+            borderRadius: "8px",
+            boxShadow: "0 8px 24px rgba(0,0,0,.4)"
+          });
         } else {
           wrap.style.height = "100%";
-          Object.assign(frame.style, { position: "", right: "", bottom: "", width: "100%", height: "100%", aspectRatio: "", zIndex: "", borderRadius: "", boxShadow: "" });
+          Object.assign(frame.style, {
+            position: "",
+            right: "",
+            bottom: "",
+            width: "100%",
+            height: "100%",
+            aspectRatio: "",
+            zIndex: "",
+            borderRadius: "",
+            boxShadow: ""
+          });
         }
       },
       { threshold: 0.25 }

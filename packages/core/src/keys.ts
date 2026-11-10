@@ -111,7 +111,18 @@ export function normalizeKey(e: Pick<KeyboardEvent, "key" | "keyCode" | "target"
   return BY_CODE[e.keyCode] ?? null;
 }
 
-export const MEDIA_KEYS: ReadonlySet<Key> = new Set<Key>(["play", "pause", "playpause", "stop", "next", "prev", "ff", "rw", "mute", "captions"]);
+export const MEDIA_KEYS: ReadonlySet<Key> = new Set<Key>([
+  "play",
+  "pause",
+  "playpause",
+  "stop",
+  "next",
+  "prev",
+  "ff",
+  "rw",
+  "mute",
+  "captions"
+]);
 export const isMediaKey = (k: Key) => MEDIA_KEYS.has(k);
 
 /** Accumulating seek step while a direction is held or pressed in a burst: 10 → 20 → 30 → 60 s. */

@@ -26,7 +26,12 @@ export function qualityGroup(core: TitanCore): MenuGroup {
   return {
     id: "quality",
     title: t("quality"),
-    options: core.qualities.map((q) => ({ id: q.id, label: q.id === "auto" ? t("qualityAuto") : q.id === "data-saver" ? t("dataSaver") : q.label, note: q.note, selected: q.id === active })),
+    options: core.qualities.map((q) => ({
+      id: q.id,
+      label: q.id === "auto" ? t("qualityAuto") : q.id === "data-saver" ? t("dataSaver") : q.label,
+      note: q.note,
+      selected: q.id === active
+    })),
     select: (id) => core.setQuality(id)
   };
 }
@@ -37,7 +42,12 @@ export function audioGroup(core: TitanCore): MenuGroup | null {
   return {
     id: "audio",
     title: t("audio"),
-    options: list.map((a) => ({ id: a.id, label: a.label + (a.original ? ` (${t("original")})` : ""), badge: a.channels, selected: a.id === core.audioTrack })),
+    options: list.map((a) => ({
+      id: a.id,
+      label: a.label + (a.original ? ` (${t("original")})` : ""),
+      badge: a.channels,
+      selected: a.id === core.audioTrack
+    })),
     select: (id) => core.setAudioTrack(id)
   };
 }
@@ -47,7 +57,10 @@ export function subtitleGroup(core: TitanCore): MenuGroup {
   return {
     id: "subtitles",
     title: t("subtitles"),
-    options: [{ id: "off", label: t("off"), selected: core.subtitleTrack === null }, ...list.map((s) => ({ id: s.id, label: s.label, badge: s.sdh ? "CC" : undefined, selected: s.id === core.subtitleTrack }))],
+    options: [
+      { id: "off", label: t("off"), selected: core.subtitleTrack === null },
+      ...list.map((s) => ({ id: s.id, label: s.label, badge: s.sdh ? "CC" : undefined, selected: s.id === core.subtitleTrack }))
+    ],
     select: (id) => void core.setSubtitleTrack(id === "off" ? null : id)
   };
 }
@@ -93,10 +106,40 @@ export function skipGroup(core: TitanCore): MenuGroup {
 
 type CapKey = "captionSize" | "captionColor" | "captionBg" | "captionEdge";
 const CAP: Record<CapKey, { title: Parameters<typeof t>[0]; values: [string, Parameters<typeof t>[0]][] }> = {
-  captionSize: { title: "captionSize", values: [["s", "sizeS"], ["m", "sizeM"], ["l", "sizeL"], ["xl", "sizeXL"]] },
-  captionColor: { title: "captionColor", values: [["white", "colorWhite"], ["yellow", "colorYellow"], ["cyan", "colorCyan"], ["green", "colorGreen"]] },
-  captionBg: { title: "captionBackground", values: [["none", "bgNone"], ["dim", "bgDim"], ["box", "bgBox"]] },
-  captionEdge: { title: "captionEdge", values: [["shadow", "edgeShadow"], ["outline", "edgeOutline"], ["none", "edgeNone"]] }
+  captionSize: {
+    title: "captionSize",
+    values: [
+      ["s", "sizeS"],
+      ["m", "sizeM"],
+      ["l", "sizeL"],
+      ["xl", "sizeXL"]
+    ]
+  },
+  captionColor: {
+    title: "captionColor",
+    values: [
+      ["white", "colorWhite"],
+      ["yellow", "colorYellow"],
+      ["cyan", "colorCyan"],
+      ["green", "colorGreen"]
+    ]
+  },
+  captionBg: {
+    title: "captionBackground",
+    values: [
+      ["none", "bgNone"],
+      ["dim", "bgDim"],
+      ["box", "bgBox"]
+    ]
+  },
+  captionEdge: {
+    title: "captionEdge",
+    values: [
+      ["shadow", "edgeShadow"],
+      ["outline", "edgeOutline"],
+      ["none", "edgeNone"]
+    ]
+  }
 };
 
 export function captionGroups(core: TitanCore, onChange: (p: Prefs) => void): MenuGroup[] {
@@ -118,12 +161,22 @@ export function timingGroup(core: TitanCore): MenuGroup {
   return {
     id: "timing",
     title: t("timing"),
-    options: steps.map((s) => ({ id: String(s), label: s === 0 ? t("offsetNone") : t("offsetValue", { v: (s > 0 ? "+" : "") + s }), note: s < 0 ? t("earlier") : s > 0 ? t("later") : undefined, selected: Math.abs(o - s) < 0.01 })),
+    options: steps.map((s) => ({
+      id: String(s),
+      label: s === 0 ? t("offsetNone") : t("offsetValue", { v: (s > 0 ? "+" : "") + s }),
+      note: s < 0 ? t("earlier") : s > 0 ? t("later") : undefined,
+      selected: Math.abs(o - s) < 0.01
+    })),
     select: (id) => core.setSubtitleOffset(Number(id))
   };
 }
 
 export function issueGroup(send: (kind: string) => void): MenuGroup {
   const labels = { video: t("reportVideo"), audio: t("reportAudio"), subtitles: t("reportSubs"), quality: t("reportQuality") };
-  return { id: "report", title: t("reportTitle"), options: ISSUES.map((i) => ({ id: i, label: labels[i], selected: false })), select: send };
+  return {
+    id: "report",
+    title: t("reportTitle"),
+    options: ISSUES.map((i) => ({ id: i, label: labels[i], selected: false })),
+    select: send
+  };
 }

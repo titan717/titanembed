@@ -52,7 +52,7 @@ for (const p of pages) {
     <div class="layout">
       <nav class="side" aria-label="Documentation">${nav}<a href="https://github.com/titan717/titanembed">GitHub</a></nav>
       <main id="content" class="prose">
-${marked.parse(p.body)}
+${String(marked.parse(p.body)).replaceAll("<pre>", "<pre tabindex=\"0\">")}
       </main>
     </div>
   </body>

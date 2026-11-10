@@ -18,7 +18,7 @@ export const COMMANDS = {
   setRate: { args: "number", min: 0.25, max: 3, doc: "Playback rate from 0.25 to 3." },
   setAudioTrack: { args: "string", doc: "Audio track id from getTracks()." },
   setSubtitleTrack: { args: "string|null", doc: "Subtitle track id, or null for Off." },
-  setQuality: { args: "string", doc: "Quality id from getQualities() (\"auto\", \"1080\", \"data-saver\", …)." },
+  setQuality: { args: "string", doc: 'Quality id from getQualities() ("auto", "1080", "data-saver", …).' },
   setTheme: { args: "object", doc: "Theme overrides: { accent, logo, radius, font, controlsOpacity }." },
   setMarkers: { args: "object", doc: "{ markers: [{ type: intro|recap|credits, start, end }] }" },
   enterFullscreen: { args: "none", doc: "Enter fullscreen (needs a user gesture in most browsers)." },
@@ -107,7 +107,12 @@ export function parseCommand(data: unknown): CommandMessage | string {
     case "none":
       break;
     case "number":
-      if (typeof a !== "number" || !Number.isFinite(a) || (spec.min !== undefined && a < spec.min) || (spec.max !== undefined && a > spec.max))
+      if (
+        typeof a !== "number" ||
+        !Number.isFinite(a) ||
+        (spec.min !== undefined && a < spec.min) ||
+        (spec.max !== undefined && a > spec.max)
+      )
         return `${cmd} needs a number between ${spec.min} and ${spec.max}`;
       break;
     case "boolean":
@@ -147,7 +152,10 @@ export function parseOrigins(raw: string | null | undefined): string[] {
   for (const part of raw.split(",").slice(0, 20)) {
     try {
       const u = new URL(part.trim());
-      if ((u.protocol === "https:" || (u.protocol === "http:" && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(u.hostname))) && u.origin !== "null")
+      if (
+        (u.protocol === "https:" || (u.protocol === "http:" && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(u.hostname))) &&
+        u.origin !== "null"
+      )
         out.push(u.origin);
     } catch {
       /* skip */

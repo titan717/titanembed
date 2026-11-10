@@ -48,7 +48,11 @@ const CONTROL = /[\u0000-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/g;
 /** Cleans untrusted display text. Returns undefined for non-strings and empty results. */
 export function cleanText(v: unknown, max: number = LIMITS.text): string | undefined {
   if (typeof v !== "string") return undefined;
-  const t = v.replace(/[\r\n\t]+/g, " ").replace(CONTROL, "").replace(/\s{2,}/g, " ").trim();
+  const t = v
+    .replace(/[\r\n\t]+/g, " ")
+    .replace(CONTROL, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
   if (!t) return undefined;
   return t.length > max ? t.slice(0, max - 1).trimEnd() + "\u2026" : t;
 }
@@ -180,11 +184,17 @@ function episode(v: unknown, errors: string[], i: number): EpisodeInput | undefi
   if (bool(v.watched)) out.watched = true;
   if (genres) out.genres = genres;
   if (Array.isArray(v.sources)) {
-    const srcs = v.sources.slice(0, LIMITS.sources).map((s, k) => source(s, errors, k)).filter((s): s is MediaSource => !!s);
+    const srcs = v.sources
+      .slice(0, LIMITS.sources)
+      .map((s, k) => source(s, errors, k))
+      .filter((s): s is MediaSource => !!s);
     if (srcs.length) out.sources = srcs;
   }
   if (Array.isArray(v.subtitles)) {
-    const subs = v.subtitles.slice(0, LIMITS.subtitles).map((s, k) => subtitle(s, errors, k)).filter((s): s is SubtitleTrackInput => !!s);
+    const subs = v.subtitles
+      .slice(0, LIMITS.subtitles)
+      .map((s, k) => subtitle(s, errors, k))
+      .filter((s): s is SubtitleTrackInput => !!s);
     if (subs.length) out.subtitles = subs;
   }
   const mk = validateMarkers(v.markers);
@@ -196,7 +206,8 @@ const FONTS = ["inter", "system", "serif", "rounded"] as const;
 export function validateTheme(v: unknown): ThemeInput | undefined {
   if (!isObj(v)) return undefined;
   const out: ThemeInput = {};
-  if (typeof v.accent === "string" && /^#?[0-9a-fA-F]{6}$/.test(v.accent.trim())) out.accent = "#" + v.accent.trim().replace(/^#/, "").toLowerCase();
+  if (typeof v.accent === "string" && /^#?[0-9a-fA-F]{6}$/.test(v.accent.trim()))
+    out.accent = "#" + v.accent.trim().replace(/^#/, "").toLowerCase();
   const logo = safeUrl(v.logo);
   if (logo) out.logo = logo;
   const radius = num(v.radius, 0, 32);
@@ -212,9 +223,12 @@ export function validateDescriptor(input: unknown): ValidationResult<MediaDescri
   const errors: string[] = [];
   if (!isObj(input)) return { ok: false, errors: ["The media descriptor must be an object."] };
   const rawSources = Array.isArray(input.sources) ? input.sources : input.src !== undefined ? [input.src] : [];
-  const sources = rawSources.slice(0, LIMITS.sources).map((s, i) => source(s, errors, i)).filter((s): s is MediaSource => !!s);
+  const sources = rawSources
+    .slice(0, LIMITS.sources)
+    .map((s, i) => source(s, errors, i))
+    .filter((s): s is MediaSource => !!s);
   if (!sources.length) {
-    errors.push("No playable source: add sources: [{ url: \"https://…/master.m3u8\" }].");
+    errors.push('No playable source: add sources: [{ url: "https://…/master.m3u8" }].');
     return { ok: false, errors };
   }
   const d: MediaDescriptor = { title: cleanText(input.title) ?? "Untitled", sources };
@@ -234,17 +248,26 @@ export function validateDescriptor(input: unknown): ValidationResult<MediaDescri
   const start = num(input.start, 0, LIMITS.maxTime);
   if (start !== undefined) d.start = start;
   if (Array.isArray(input.subtitles)) {
-    const subs = input.subtitles.slice(0, LIMITS.subtitles).map((s, i) => subtitle(s, errors, i)).filter((s): s is SubtitleTrackInput => !!s);
+    const subs = input.subtitles
+      .slice(0, LIMITS.subtitles)
+      .map((s, i) => subtitle(s, errors, i))
+      .filter((s): s is SubtitleTrackInput => !!s);
     if (subs.length) d.subtitles = subs;
   }
   if (Array.isArray(input.audio)) {
-    const a = input.audio.slice(0, LIMITS.audio).map(audio).filter((s): s is AudioTrackInput => !!s);
+    const a = input.audio
+      .slice(0, LIMITS.audio)
+      .map(audio)
+      .filter((s): s is AudioTrackInput => !!s);
     if (a.length) d.audio = a;
   }
   const mk = validateMarkers(input.markers);
   if (mk.length) d.markers = mk;
   if (Array.isArray(input.episodes)) {
-    const eps = input.episodes.slice(0, LIMITS.episodes).map((e, i) => episode(e, errors, i)).filter((e): e is EpisodeInput => !!e);
+    const eps = input.episodes
+      .slice(0, LIMITS.episodes)
+      .map((e, i) => episode(e, errors, i))
+      .filter((e): e is EpisodeInput => !!e);
     if (eps.length) d.episodes = eps;
   }
   if (input.next !== undefined) {

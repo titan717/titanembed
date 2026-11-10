@@ -5,7 +5,11 @@
 type Child = Node | string | number | false | null | undefined;
 type Props = Record<string, string | number | boolean | null | undefined | EventListener>;
 
-export function h<K extends keyof HTMLElementTagNameMap>(tag: K, props?: Props | null, ...children: (Child | Child[])[]): HTMLElementTagNameMap[K] {
+export function h<K extends keyof HTMLElementTagNameMap>(
+  tag: K,
+  props?: Props | null,
+  ...children: (Child | Child[])[]
+): HTMLElementTagNameMap[K] {
   const el = document.createElement(tag);
   if (props) {
     for (const [k, v] of Object.entries(props)) {

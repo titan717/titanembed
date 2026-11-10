@@ -232,10 +232,16 @@ export class TitanCore extends Emitter<CoreEvents> {
     return { at: this.sleepAt, episode: this.sleepEpisode };
   }
   get isPip(): boolean {
-    return (typeof document !== "undefined" && document.pictureInPictureElement === this.video) || this.video.webkitPresentationMode === "picture-in-picture";
+    return (
+      (typeof document !== "undefined" && document.pictureInPictureElement === this.video) ||
+      this.video.webkitPresentationMode === "picture-in-picture"
+    );
   }
   get canPip(): boolean {
-    return (typeof document !== "undefined" && !!document.pictureInPictureEnabled && !this.video.disablePictureInPicture) || !!this.video.webkitSupportsPresentationMode?.("picture-in-picture");
+    return (
+      (typeof document !== "undefined" && !!document.pictureInPictureEnabled && !this.video.disablePictureInPicture) ||
+      !!this.video.webkitSupportsPresentationMode?.("picture-in-picture")
+    );
   }
 
   /* ---------------- loading ---------------- */
@@ -375,7 +381,8 @@ export class TitanCore extends Emitter<CoreEvents> {
         return this.nextSource({ code: "E_HLS_UNAVAILABLE", message: "The streaming module couldn't load.", recoverable: true });
       }
       if (token !== this.loadToken) return;
-      if (!Ctor.isSupported()) return this.nextSource({ code: "E_SOURCE_UNSUPPORTED", message: "Streaming isn't supported here.", recoverable: false });
+      if (!Ctor.isSupported())
+        return this.nextSource({ code: "E_SOURCE_UNSUPPORTED", message: "Streaming isn't supported here.", recoverable: false });
       this.attachHls(Ctor, src.url, token);
     } else {
       this.video.src = src.url;
@@ -411,7 +418,12 @@ export class TitanCore extends Emitter<CoreEvents> {
       maxBufferLength: 30,
       maxMaxBufferLength: 60,
       fragLoadPolicy: {
-        default: { maxTimeToFirstByteMs: 10000, maxLoadTimeMs: 120000, timeoutRetry: { maxNumRetry: 4, retryDelayMs: 0, maxRetryDelayMs: 0 }, errorRetry: { maxNumRetry: 6, retryDelayMs: 1000, maxRetryDelayMs: 8000 } }
+        default: {
+          maxTimeToFirstByteMs: 10000,
+          maxLoadTimeMs: 120000,
+          timeoutRetry: { maxNumRetry: 4, retryDelayMs: 0, maxRetryDelayMs: 0 },
+          errorRetry: { maxNumRetry: 6, retryDelayMs: 1000, maxRetryDelayMs: 8000 }
+        }
       }
     });
     this.pendingStart = null;
@@ -443,18 +455,21 @@ export class TitanCore extends Emitter<CoreEvents> {
       this.activeAudio = String(data.id);
       this.emitTracks();
     });
-    hls.on(E.NON_NATIVE_TEXT_TRACKS_FOUND, (_e, data: { tracks: { label: string; kind: string; default: boolean; subtitleTrack?: MediaPlaylist }[] }) => {
-      this.streamTracks = data.tracks
-        .filter((t) => t.kind === "subtitles" || t.kind === "captions")
-        .map((t, i) => ({
-          id: `hls-${i}`,
-          lang: t.subtitleTrack?.lang ?? "und",
-          label: t.label || t.subtitleTrack?.lang || `Subtitles ${i + 1}`,
-          sdh: t.kind === "captions" || /\bcc\b|sdh/i.test(t.label),
-          origin: "stream" as const
-        }));
-      this.emitTracks();
-    });
+    hls.on(
+      E.NON_NATIVE_TEXT_TRACKS_FOUND,
+      (_e, data: { tracks: { label: string; kind: string; default: boolean; subtitleTrack?: MediaPlaylist }[] }) => {
+        this.streamTracks = data.tracks
+          .filter((t) => t.kind === "subtitles" || t.kind === "captions")
+          .map((t, i) => ({
+            id: `hls-${i}`,
+            lang: t.subtitleTrack?.lang ?? "und",
+            label: t.label || t.subtitleTrack?.lang || `Subtitles ${i + 1}`,
+            sdh: t.kind === "captions" || /\bcc\b|sdh/i.test(t.label),
+            origin: "stream" as const
+          }));
+        this.emitTracks();
+      }
+    );
     hls.on(E.CUES_PARSED, (_e, data: { track: string; cues: VTTCue[] }) => {
       // hls.js names non-native tracks "subtitles0" / "textTrack0"; map to our ids by index
       const idx = /(\d+)$/.exec(data.track)?.[1];
@@ -572,7 +587,9 @@ export class TitanCore extends Emitter<CoreEvents> {
       if (!tiers.has(t.id)) tiers.set(t.id, { id: t.id, label: t.label, note: t.note, height: Number(t.id) });
     }
     const list = [...tiers.values()].sort((a, b) => (b.height ?? 0) - (a.height ?? 0));
-    this.qualityList = list.length ? [{ id: "auto", label: "Auto" }, ...list, { id: "data-saver", label: "Data Saver", note: "Lowest data use" }] : [];
+    this.qualityList = list.length
+      ? [{ id: "auto", label: "Auto" }, ...list, { id: "data-saver", label: "Data Saver", note: "Lowest data use" }]
+      : [];
     this.emit("qualitychange", { active: this.activeQuality, qualities: this.qualityList });
   }
 
@@ -585,7 +602,8 @@ export class TitanCore extends Emitter<CoreEvents> {
     const tiers = new Map<string, Quality>();
     for (const s of prog) {
       const t = tierFor(s.height!);
-      if (!tiers.has(t.id)) tiers.set(t.id, { id: t.id, label: s.label && !/^\d+p$/.test(s.label) ? s.label : t.label, note: t.note, height: Number(t.id) });
+      if (!tiers.has(t.id))
+        tiers.set(t.id, { id: t.id, label: s.label && !/^\d+p$/.test(s.label) ? s.label : t.label, note: t.note, height: Number(t.id) });
     }
     const list = [...tiers.values()].sort((a, b) => (b.height ?? 0) - (a.height ?? 0));
     this.qualityList = [{ id: "auto", label: "Auto" }, ...list, { id: "data-saver", label: "Data Saver", note: "Lowest data use" }];
@@ -666,7 +684,7 @@ export class TitanCore extends Emitter<CoreEvents> {
     this.audioList = [];
     for (let k = 0; k < at.length; k++) {
       const t = at[k]!;
-      this.audioList.push({ id: String(k), lang: t.language || "und", label: t.label || t.language || `Track ${k + 1}`});
+      this.audioList.push({ id: String(k), lang: t.language || "und", label: t.label || t.language || `Track ${k + 1}` });
       if (t.enabled) this.activeAudio = String(k);
     }
     this.mergeAudioLabels();
@@ -684,7 +702,13 @@ export class TitanCore extends Emitter<CoreEvents> {
       const id = `native-${k}`;
       this.nativeTextTracks.set(id, t);
       if (t.mode === "showing") t.mode = "disabled";
-      out.push({ id, lang: t.language || "und", label: t.label || t.language || `Subtitles ${k + 1}`, sdh: t.kind === "captions", origin: "stream" });
+      out.push({
+        id,
+        lang: t.language || "und",
+        label: t.label || t.language || `Subtitles ${k + 1}`,
+        sdh: t.kind === "captions",
+        origin: "stream"
+      });
     }
     this.streamTracks = out;
     this.emitTracks();
@@ -693,7 +717,7 @@ export class TitanCore extends Emitter<CoreEvents> {
   async setSubtitleTrack(id: string | null) {
     this.activeText = id;
     if (this.opts.persist) {
-      const lang = id ? this.subtitleTracks.find((t) => t.id === id)?.lang ?? null : null;
+      const lang = id ? (this.subtitleTracks.find((t) => t.id === id)?.lang ?? null) : null;
       savePrefs({ subtitleLang: lang });
       this.prefs.subtitleLang = lang;
     }
@@ -712,7 +736,8 @@ export class TitanCore extends Emitter<CoreEvents> {
         this.cueStore.set(ext.id, parseSubtitles(text));
       } catch {
         this.cueStore.set(ext.id, []);
-        if (this.activeText === ext.id) this.emit("error", { code: "E_NETWORK", message: `Subtitles "${ext.label}" couldn't be loaded.`, recoverable: true });
+        if (this.activeText === ext.id)
+          this.emit("error", { code: "E_NETWORK", message: `Subtitles "${ext.label}" couldn't be loaded.`, recoverable: true });
       }
     }
     this.lastCueKey = "";
@@ -750,7 +775,12 @@ export class TitanCore extends Emitter<CoreEvents> {
   }
 
   private emitTracks() {
-    this.emit("tracks", { audio: this.audioList, subtitles: this.subtitleTracks, activeAudio: this.activeAudio, activeSubtitle: this.activeText });
+    this.emit("tracks", {
+      audio: this.audioList,
+      subtitles: this.subtitleTracks,
+      activeAudio: this.activeAudio,
+      activeSubtitle: this.activeText
+    });
   }
 
   private async loadThumbnails(url: string, token: number) {
@@ -1063,7 +1093,8 @@ export class TitanCore extends Emitter<CoreEvents> {
       if (!v.paused) this.armStall();
     });
     this.listen("seeking", () => {
-      this.sm.to("seeking");
+      // the initial jump to `start` happens before the first canplay; keep "loading" so autoplay still fires
+      if (this.state !== "loading") this.sm.to("seeking");
       this.emit("seeking", { time: v.currentTime });
     });
     this.listen("seeked", () => {
@@ -1072,6 +1103,7 @@ export class TitanCore extends Emitter<CoreEvents> {
       this.lastCueKey = "";
       this.tickCues();
       this.tickMarkers();
+      if (this.state === "loading") return;
       if (v.paused) this.sm.to("paused");
       else if (v.readyState >= 3) this.sm.to("playing");
       else this.sm.to("buffering");
@@ -1133,7 +1165,12 @@ export class TitanCore extends Emitter<CoreEvents> {
         return this.nextSource({ code: "E_NETWORK", message: "The video couldn't be reached.", recoverable: true });
       }
       if (code === 3) return this.nextSource({ code: "E_DECODE", message: "This video couldn't be decoded.", recoverable: false });
-      if (code === 4) return this.nextSource({ code: "E_SOURCE_UNSUPPORTED", message: "This video format can't be played on this device.", recoverable: false });
+      if (code === 4)
+        return this.nextSource({
+          code: "E_SOURCE_UNSUPPORTED",
+          message: "This video format can't be played on this device.",
+          recoverable: false
+        });
     });
     this.listen("enterpictureinpicture", () => this.emit("enterpip", undefined));
     this.listen("leavepictureinpicture", () => this.emit("leavepip", undefined));
@@ -1184,7 +1221,8 @@ export class TitanCore extends Emitter<CoreEvents> {
       if (this.hls) this.hls.startLoad(t);
       else {
         this.retries++;
-        if (this.retries > this.opts.backoff.length) return this.nextSource({ code: "E_NETWORK", message: "Playback stalled.", recoverable: true });
+        if (this.retries > this.opts.backoff.length)
+          return this.nextSource({ code: "E_NETWORK", message: "Playback stalled.", recoverable: true });
         this.video.currentTime = t + 0.01;
       }
       this.armStall();
@@ -1229,10 +1267,15 @@ export class TitanCore extends Emitter<CoreEvents> {
     try {
       if (typeof MediaMetadata !== "undefined") {
         const art = this.media.poster ?? this.media.backdrop;
-        const meta = new MediaMetadata({ title: this.media.title, artist: this.media.subtitle ?? "", artwork: art ? [{ src: art, sizes: "512x512" }] : [] });
+        const meta = new MediaMetadata({
+          title: this.media.title,
+          artist: this.media.subtitle ?? "",
+          artwork: art ? [{ src: art, sizes: "512x512" }] : []
+        });
         if (ms.metadata?.title !== meta.title || ms.metadata?.artist !== meta.artist) ms.metadata = meta;
       }
-      ms.playbackState = this.state === "playing" ? "playing" : this.state === "paused" || this.state === "ended" ? "paused" : ms.playbackState;
+      ms.playbackState =
+        this.state === "playing" ? "playing" : this.state === "paused" || this.state === "ended" ? "paused" : ms.playbackState;
       const set = (a: MediaSessionAction, fn: MediaSessionActionHandler | null) => {
         try {
           ms.setActionHandler(a, fn);
@@ -1255,7 +1298,11 @@ export class TitanCore extends Emitter<CoreEvents> {
   private updatePosition() {
     try {
       if (!("mediaSession" in navigator) || !navigator.mediaSession.setPositionState || !this.duration) return;
-      navigator.mediaSession.setPositionState({ duration: this.duration, playbackRate: this.video.playbackRate || 1, position: Math.min(this.video.currentTime, this.duration) });
+      navigator.mediaSession.setPositionState({
+        duration: this.duration,
+        playbackRate: this.video.playbackRate || 1,
+        position: Math.min(this.video.currentTime, this.duration)
+      });
     } catch {
       /* ignore */
     }

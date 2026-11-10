@@ -52,15 +52,15 @@
           </div>
           <div class="cmds" id="cmds"></div>
           <h3>Events</h3>
-          <ol class="log" id="log" aria-live="off"></ol>
+          <ol class="log" id="log" aria-live="off" tabindex="0" aria-label="Event log"></ol>
         </div>
         <div class="panel">
           <div class="panel-head">
             <h2>Embed code</h2>
             <button class="copy" id="copy" type="button">Copy</button>
           </div>
-          <div class="tabs" id="code-tabs" role="tablist"></div>
-          <pre class="code"><code id="code"></code></pre>
+          <div class="tabs" id="code-tabs" role="group" aria-label="Embed code format"></div>
+          <pre class="code" tabindex="0" aria-label="Embed code"><code id="code"></code></pre>
           <p class="small">The iframe needs <code>allow-scripts allow-same-origin</code> in its sandbox, and the commands only work for origins you list in <code>origins</code>. See <a href="/docs/security.html">Security</a>.</p>
         </div>
       </section>

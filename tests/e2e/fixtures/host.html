@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8" /><title>Titan Embed test host</title></head>
+  <body style="margin:0">
+    <iframe id="f" title="Video player" style="width:1280px;height:720px;border:0" allow="autoplay; fullscreen; picture-in-picture"></iframe>
+    <script>
+      // The embed URL arrives in ?embed=…; every titan message is recorded for the test to inspect.
+      const embed = new URLSearchParams(location.search).get("embed");
+      document.getElementById("f").src = embed;
+      window.msgs = [];
+      addEventListener("message", (e) => {
+        if (e.data && e.data.ns === "titan") window.msgs.push({ origin: e.origin, data: e.data });
+      });
+      window.send = (cmd, args, id) => document.getElementById("f").contentWindow.postMessage({ ns: "titan", v: 1, type: "command", id, cmd, args }, "*");
+    </script>
+  </body>
+</html>

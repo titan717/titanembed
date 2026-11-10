@@ -141,7 +141,9 @@ legend {
   background: var(--surface);
   color: var(--text);
   cursor: pointer;
-  transition: background-color 160ms, border-color 160ms;
+  transition:
+    background-color 160ms,
+    border-color 160ms;
 }
 .seg button:hover,
 .cmds button:hover,

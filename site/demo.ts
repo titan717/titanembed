@@ -65,7 +65,9 @@ const MEDIA: { id: string; label: string; media: MediaDescriptor }[] = [
       rating: "12+",
       advisory: "Mild science-fiction violence",
       genres: "Science fiction",
-      sources: [{ url: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8", type: "hls" }],
+      sources: [
+        { url: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8", type: "hls" }
+      ],
       markers: [{ type: "credits", start: 650, end: 734 }]
     }
   }
@@ -146,7 +148,13 @@ function mount() {
   const frame = $("frame");
   frame.style.aspectRatio = `${device.w} / ${device.h}`;
   frame.dataset.device = device.id;
-  player = createPlayer(frame, { embedUrl, media, player: device.player, theme: accent ? { accent } : undefined, title: `${media.title} — Titan Embed ${device.label} player` });
+  player = createPlayer(frame, {
+    embedUrl,
+    media,
+    player: device.player,
+    theme: accent ? { accent } : undefined,
+    title: `${media.title} — Titan Embed ${device.label} player`
+  });
   player.on("*", (e) => {
     const { event, data } = e as unknown as { event: string; data: unknown };
     if (event === "timeupdate") lastTime = (data as { time: number }).time;
@@ -159,18 +167,33 @@ function mount() {
   renderCode();
 }
 
-seg($("device"), DEVICES, () => state.device, (id) => ((state.device = id), mount()));
-seg($("media"), MEDIA, () => state.media, (id) => {
-  state.media = id;
-  void player?.load(current().media).catch((err: Error) => addLog("error", err.message));
-  renderCode();
-});
-seg($("accent"), ACCENTS, () => state.accent, (id) => {
-  state.accent = id;
-  const a = current().accent;
-  void player?.setTheme(a ? { accent: a } : {}).catch((err: Error) => addLog("error", err.message));
-  renderCode();
-});
+seg(
+  $("device"),
+  DEVICES,
+  () => state.device,
+  (id) => ((state.device = id), mount())
+);
+seg(
+  $("media"),
+  MEDIA,
+  () => state.media,
+  (id) => {
+    state.media = id;
+    void player?.load(current().media).catch((err: Error) => addLog("error", err.message));
+    renderCode();
+  }
+);
+seg(
+  $("accent"),
+  ACCENTS,
+  () => state.accent,
+  (id) => {
+    state.accent = id;
+    const a = current().accent;
+    void player?.setTheme(a ? { accent: a } : {}).catch((err: Error) => addLog("error", err.message));
+    renderCode();
+  }
+);
 
 const CMDS: { label: string; run: (p: TitanPlayer) => Promise<unknown> }[] = [
   { label: "Play", run: (p) => p.play() },
@@ -201,7 +224,12 @@ const TABS = [
   { id: "sdk", label: "SDK" },
   { id: "react", label: "React" }
 ] as const;
-seg($("code-tabs"), [...TABS], () => state.tab, (id) => ((state.tab = id as typeof state.tab), renderCode()));
+seg(
+  $("code-tabs"),
+  [...TABS],
+  () => state.tab,
+  (id) => ((state.tab = id as typeof state.tab), renderCode())
+);
 
 function renderCode() {
   const { device, media, accent } = current();

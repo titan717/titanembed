@@ -19,7 +19,7 @@ The embed sends a `playerclass` event with the result, and re-checks when an aut
 | Key | Controls hidden | Controls visible |
 | --- | --- | --- |
 | OK / Enter | Shows controls (first press only wakes) | Activates the focused control |
-| Left / Right | Seeks without the controls: steps add up 10 → 20 → 30 → 60 s, with a bubble | Moves focus; on the progress bar seeks |
+| Left / Right | Seeks without the controls, with a bubble. Steps grow while you keep pressing: 10 s, then 20 s, 30 s and 60 s | Moves focus; on the progress bar seeks |
 | Up / Down | Shows controls | Moves focus between rows |
 | Back | Sends `exit` to the host | Closes a panel, then hides the controls |
 | Play, Pause, Play/Pause, FF, RW, Next, Previous, Stop | Act immediately | Act immediately |

@@ -141,7 +141,9 @@
 }
 .t-btn.is-primary:focus-visible,
 .t-btn.is-primary.is-focus {
-  box-shadow: var(--focus-ring), 0 0 calc(18 * var(--u)) rgba(255, 255, 255, 0.25);
+  box-shadow:
+    var(--focus-ring),
+    0 0 calc(18 * var(--u)) rgba(255, 255, 255, 0.25);
   border-color: #0f1014 !important;
 }
 

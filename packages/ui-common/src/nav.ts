@@ -1,6 +1,6 @@
 export type Dir = "left" | "right" | "up" | "down";
 
-const SELECTOR = 'button:not([disabled]):not([hidden]), [data-nav]:not([hidden])';
+const SELECTOR = "button:not([disabled]):not([hidden]), [data-nav]:not([hidden])";
 
 function visible(el: HTMLElement): boolean {
   if (el.closest("[hidden]")) return false;

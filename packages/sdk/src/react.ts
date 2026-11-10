@@ -60,5 +60,9 @@ export const TitanEmbed = forwardRef<TitanPlayer | null, TitanEmbedProps>(functi
     if (props.theme) void player.current?.setTheme(props.theme).catch(() => undefined);
   }, [themeKey]);
 
-  return createElement("div", { ref: host, className: props.className, style: { position: "relative", aspectRatio: "16 / 9", background: "#000", ...props.style } });
+  return createElement("div", {
+    ref: host,
+    className: props.className,
+    style: { position: "relative", aspectRatio: "16 / 9", background: "#000", ...props.style }
+  });
 });

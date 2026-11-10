@@ -227,7 +227,8 @@
 .m-track {
   position: relative;
   flex: 1;
-  padding: 18px 0;
+  /* 32px touch target; the bottom padding equals the old visual gap so the track's hit area never covers the chips */
+  padding: 16px 0 12px;
   cursor: pointer;
   touch-action: none;
   --track-h: 4px;
@@ -242,7 +243,6 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-top: -6px;
 }
 .m-row-left,
 .m-row-right {

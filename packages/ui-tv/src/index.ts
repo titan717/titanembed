@@ -100,14 +100,28 @@ export class TvPlayer {
     this.titleEl = h("strong", { class: "tv-title-main" });
     this.subEl = h("span", { class: "tv-title-sub" });
     this.qualityValue = h("span", { class: "tv-pill-value" }, t("qualityAuto"));
-    this.qualityPill = this.pill("quality", [h("span", null, t("quality")), this.qualityValue], () => this.openPanel("quality", this.qualityPill));
+    this.qualityPill = this.pill("quality", [h("span", null, t("quality")), this.qualityValue], () =>
+      this.openPanel("quality", this.qualityPill)
+    );
     this.audioPill = this.pill("subtitles", [h("span", null, t("audioSubtitles"))], () => this.openPanel("audio", this.audioPill));
     this.settingsPill = this.pill("settings", [], () => this.openPanel("settings", this.settingsPill), t("settings"));
     this.settingsPill.classList.add("is-icon");
-    const top = h("div", { class: "tv-top" }, h("div", { class: "tv-title" }, this.titleEl, this.subEl), h("div", { class: "tv-actions" }, this.qualityPill, this.audioPill, this.settingsPill));
+    const top = h(
+      "div",
+      { class: "tv-top" },
+      h("div", { class: "tv-title" }, this.titleEl, this.subEl),
+      h("div", { class: "tv-actions" }, this.qualityPill, this.audioPill, this.settingsPill)
+    );
 
     // bottom: track + remaining time (p7, p19), Watch Next below-left (p3)
-    this.trackEl = h("div", { class: "tv-track", "data-nav": "track", tabindex: "0", role: "slider", "aria-label": t("seekBar"), "aria-valuemin": "0" });
+    this.trackEl = h("div", {
+      class: "tv-track",
+      "data-nav": "track",
+      tabindex: "0",
+      role: "slider",
+      "aria-label": t("seekBar"),
+      "aria-valuemin": "0"
+    });
     this.trackEl.appendChild(this.track.el);
     this.timeEl = h("span", { class: "tv-time" });
     this.watchPill = this.pill("watchnext", [h("span", null, t("watchNext"))], () => this.openWatch());
@@ -116,7 +130,12 @@ export class TvPlayer {
 
     // seek preview strip (p19) + delta bubble
     for (let i = 0; i < 3; i++) {
-      const th = h("div", { class: `tv-thumb${i === 1 ? " is-center" : ""}` }, h("div", { class: "tv-thumb-img" }), h("span", { class: "tv-thumb-time" }));
+      const th = h(
+        "div",
+        { class: `tv-thumb${i === 1 ? " is-center" : ""}` },
+        h("div", { class: "tv-thumb-img" }),
+        h("span", { class: "tv-thumb-time" })
+      );
       this.stripThumbs.push(th);
     }
     this.strip = h("div", { class: "tv-strip", "aria-hidden": "true" }, ...this.stripThumbs);
@@ -127,7 +146,19 @@ export class TvPlayer {
     this.panelEl = h("div", { class: "tv-panel", role: "dialog", "aria-modal": "true" });
     this.watchEl = h("div", { class: "tv-watch", role: "dialog", "aria-modal": "true", "aria-label": t("watchNext") });
 
-    root.append(h("div", { class: "tv-scrim" }), this.captions.el, this.captions.liveRegion, this.paused, this.langs, this.strip, this.bubble, top, bottom, this.watchEl, this.panelEl);
+    root.append(
+      h("div", { class: "tv-scrim" }),
+      this.captions.el,
+      this.captions.liveRegion,
+      this.paused,
+      this.langs,
+      this.strip,
+      this.bubble,
+      top,
+      bottom,
+      this.watchEl,
+      this.panelEl
+    );
     this.views = new StateViews(core, root, "tv");
     this.views.onModal = (el) => this.onModal(el);
     this.views.onSkip = (on) => this.onSkip(on);
@@ -151,43 +182,55 @@ export class TvPlayer {
   private bindCore() {
     const c = this.core;
     const b = this.bag;
-    b.add(c.on("load", ({ media }) => {
-      text(this.titleEl, media.title);
-      text(this.subEl, media.subtitle ?? "");
-      this.watchPill.hidden = !this.episodeList().length;
-      this.closePanel();
-      this.closeWatch();
-      this.renderLangs();
-      this.track.markers(media.markers ?? [], 0);
-    }));
+    b.add(
+      c.on("load", ({ media }) => {
+        text(this.titleEl, media.title);
+        text(this.subEl, media.subtitle ?? "");
+        this.watchPill.hidden = !this.episodeList().length;
+        this.closePanel();
+        this.closeWatch();
+        this.renderLangs();
+        this.track.markers(media.markers ?? [], 0);
+      })
+    );
     b.add(c.on("timeupdate", ({ time, duration }) => this.paintTime(time, duration)));
     b.add(c.on("progress", () => this.paintTime(c.time, c.duration)));
     b.add(c.on("loadedmetadata", ({ duration }) => this.track.markers(c.markers, duration)));
     b.add(c.on("markers", ({ markers }) => this.track.markers(markers, c.duration)));
-    b.add(c.on("statechange", ({ state }) => {
-      cls(this.root, "is-paused", state === "paused" || state === "ready");
-      cls(this.root, "is-playing", state === "playing");
-      if (state === "paused" || state === "ended") this.wake(false, true);
-      else if (state === "playing") this.armHide();
-    }));
+    b.add(
+      c.on("statechange", ({ state }) => {
+        cls(this.root, "is-paused", state === "paused" || state === "ready");
+        cls(this.root, "is-playing", state === "playing");
+        if (state === "paused" || state === "ended") this.wake(false, true);
+        else if (state === "playing") this.armHide();
+      })
+    );
     b.add(c.on("cues", ({ cues }) => this.captions.render(cues)));
-    b.add(c.on("qualitychange", ({ active }) => {
-      const q = c.qualities.find((x) => x.id === active);
-      text(this.qualityValue, !q || q.id === "auto" ? t("qualityAuto") : q.id === "data-saver" ? t("dataSaver") : q.label);
-      this.qualityPill.hidden = c.qualities.length < 2;
-      if (this.panel === "quality") this.rerender();
-    }));
-    b.add(c.on("tracks", () => {
-      this.renderLangs();
-      if (this.panel === "audio") this.rerender();
-    }));
-    b.add(c.on("ready", () => {
-      this.qualityPill.hidden = c.qualities.length < 2;
-      this.paintTime(c.time, c.duration);
-    }));
-    b.add(c.on("sleep", () => {
-      if (this.panel === "settings") this.rerender();
-    }));
+    b.add(
+      c.on("qualitychange", ({ active }) => {
+        const q = c.qualities.find((x) => x.id === active);
+        text(this.qualityValue, !q || q.id === "auto" ? t("qualityAuto") : q.id === "data-saver" ? t("dataSaver") : q.label);
+        this.qualityPill.hidden = c.qualities.length < 2;
+        if (this.panel === "quality") this.rerender();
+      })
+    );
+    b.add(
+      c.on("tracks", () => {
+        this.renderLangs();
+        if (this.panel === "audio") this.rerender();
+      })
+    );
+    b.add(
+      c.on("ready", () => {
+        this.qualityPill.hidden = c.qualities.length < 2;
+        this.paintTime(c.time, c.duration);
+      })
+    );
+    b.add(
+      c.on("sleep", () => {
+        if (this.panel === "settings") this.rerender();
+      })
+    );
   }
 
   private paintTime(time: number, duration: number) {
@@ -205,7 +248,15 @@ export class TvPlayer {
     if (list.length < 2) return;
     for (const a of list) {
       const active = a.id === this.core.audioTrack;
-      this.langs.appendChild(h("span", { class: `tv-lang${active ? " is-active" : ""}` }, active ? icon("check") : null, a.label, a.original ? h("small", null, t("original")) : null));
+      this.langs.appendChild(
+        h(
+          "span",
+          { class: `tv-lang${active ? " is-active" : ""}` },
+          active ? icon("check") : null,
+          a.label,
+          a.original ? h("small", null, t("original")) : null
+        )
+      );
     }
     this.langs.classList.remove("is-on");
     void this.langs.offsetWidth;
@@ -457,6 +508,11 @@ export class TvPlayer {
     }
     if (k === "enter") {
       c.userGesture();
+      if ((!f || f === this.root || !this.root.contains(f)) && this.views.skipVisible && this.seekTarget === null) {
+        // nothing focused yet: OK acts on the on-screen Skip button, as it does with the controls hidden
+        this.views.skip.click();
+        return true;
+      }
       if (!f || f === this.root || f === this.trackEl || !this.root.contains(f)) {
         if (this.seekTarget !== null) this.commitSeek();
         else c.toggle();
@@ -561,7 +617,15 @@ export class TvPlayer {
   }
 
   private onSkip(on: boolean) {
-    if (on && !this.visible && !this.panel && !this.watchOpen && !this.views.modal) focusEl(this.views.skip);
+    const a = document.activeElement as HTMLElement | null;
+    if (on) {
+      // Skip takes focus unless the viewer is already working somewhere other than the default landing spot
+      const idle = !this.visible || !a || a === this.trackEl || !this.root.contains(a);
+      if (idle && !this.panel && !this.watchOpen && !this.views.modal && this.seekTarget === null) focusEl(this.views.skip);
+    } else if (a === this.views.skip) {
+      if (this.visible) focusEl(this.trackEl);
+      else a.blur();
+    }
   }
 
   /* ---------------- panels ---------------- */
@@ -661,13 +725,22 @@ export class TvPlayer {
       { label: t("captionStyle"), value: "", open: () => this.subCaptions() },
       { label: t("skipBehaviour"), value: sel(skipGroup(c)), open: () => this.sub(() => skipGroup(c)) }
     ];
-    if (c.subtitleTrack) entries.splice(3, 0, { label: t("timing"), value: sel(timingGroup(c)), open: () => this.sub(() => timingGroup(c)) });
+    if (c.subtitleTrack)
+      entries.splice(3, 0, { label: t("timing"), value: sel(timingGroup(c)), open: () => this.sub(() => timingGroup(c)) });
     const rows = entries.map((e) => {
-      const b = h("button", { type: "button", class: "tv-row is-nav" }, h("span", { class: "tv-row-text" }, h("span", null, e.label), e.value ? h("small", null, e.value) : null), icon("back", "t-icon tv-chev"));
+      const b = h(
+        "button",
+        { type: "button", class: "tv-row is-nav" },
+        h("span", { class: "tv-row-text" }, h("span", null, e.label), e.value ? h("small", null, e.value) : null),
+        icon("back", "t-icon tv-chev")
+      );
       b.addEventListener("click", (ev) => (ev.stopPropagation(), e.open()));
       return b;
     });
-    this.panelEl.append(h("h2", { class: "tv-panel-title" }, t("settings")), h("div", { class: "tv-panel-body", "data-scroll": "" }, h("div", { class: "tv-list" }, ...rows)));
+    this.panelEl.append(
+      h("h2", { class: "tv-panel-title" }, t("settings")),
+      h("div", { class: "tv-panel-body", "data-scroll": "" }, h("div", { class: "tv-list" }, ...rows))
+    );
   }
 
   /** Pushes a sub-list (one menu group) onto the settings panel. */
@@ -675,7 +748,10 @@ export class TvPlayer {
     const render = () => {
       const g = make();
       clear(this.panelEl);
-      this.panelEl.append(h("h2", { class: "tv-panel-title" }, g.title), h("div", { class: "tv-panel-body", "data-scroll": "" }, this.list(g, true, true)));
+      this.panelEl.append(
+        h("h2", { class: "tv-panel-title" }, g.title),
+        h("div", { class: "tv-panel-body", "data-scroll": "" }, this.list(g, true, true))
+      );
     };
     this.panelStack.push(render);
     render();
@@ -687,12 +763,17 @@ export class TvPlayer {
     const render = () => {
       const groups = captionGroups(this.core, (p) => this.captions.style(p));
       const preview = captionPreview(t("captionPreview"));
-      preview.querySelector(".t-captions")!.className = `t-captions is-preview cap-s-${this.core.preferences.captionSize} cap-c-${this.core.preferences.captionColor} cap-bg-${this.core.preferences.captionBg} cap-e-${this.core.preferences.captionEdge}`;
+      preview.querySelector(".t-captions")!.className =
+        `t-captions is-preview cap-s-${this.core.preferences.captionSize} cap-c-${this.core.preferences.captionColor} cap-bg-${this.core.preferences.captionBg} cap-e-${this.core.preferences.captionEdge}`;
       clear(this.panelEl);
       this.panelEl.append(
         h("h2", { class: "tv-panel-title" }, t("captionStyle")),
         preview,
-        h("div", { class: "tv-panel-body", "data-scroll": "" }, ...groups.map((g) => h("div", { class: "tv-chipgroup" }, h("h3", { class: "tv-group" }, g.title), this.chips(g))))
+        h(
+          "div",
+          { class: "tv-panel-body", "data-scroll": "" },
+          ...groups.map((g) => h("div", { class: "tv-chipgroup" }, h("h3", { class: "tv-group" }, g.title), this.chips(g)))
+        )
       );
     };
     this.panelStack.push(render);
@@ -705,7 +786,11 @@ export class TvPlayer {
       "div",
       { class: "tv-chips", role: "radiogroup", "aria-label": g.title },
       ...g.options.map((o) => {
-        const b = h("button", { type: "button", role: "radio", "aria-checked": String(o.selected), class: `tv-chip${o.selected ? " is-selected" : ""}` }, o.label);
+        const b = h(
+          "button",
+          { type: "button", role: "radio", "aria-checked": String(o.selected), class: `tv-chip${o.selected ? " is-selected" : ""}` },
+          o.label
+        );
         b.addEventListener("click", (e) => {
           e.stopPropagation();
           g.select(o.id);
@@ -723,7 +808,12 @@ export class TvPlayer {
       ...g.options.map((o) => {
         const b = h(
           "button",
-          { type: "button", role: "radio", "aria-checked": String(o.selected), class: `tv-row${o.selected ? " is-selected" : ""}${inline ? " is-inline" : ""}` },
+          {
+            type: "button",
+            role: "radio",
+            "aria-checked": String(o.selected),
+            class: `tv-row${o.selected ? " is-selected" : ""}${inline ? " is-inline" : ""}`
+          },
           h("span", { class: "tv-check" }, o.selected ? icon("check") : null),
           h(
             "span",
@@ -790,7 +880,17 @@ export class TvPlayer {
       if (ep.id === cur) media.appendChild(h("span", { class: "tv-card-now" }, t("play")));
       const se = ep.season && ep.episode ? `S${ep.season} E${ep.episode}` : ep.episode ? t("episodeShort", { n: ep.episode }) : "";
       const meta = [se, ep.duration ? `${Math.round(ep.duration / 60)}m` : "", ep.genres ?? ""].filter(Boolean).join(" · ");
-      const b = h("button", { type: "button", class: `tv-card${ep.id === this.core.current?.next?.id ? " is-selected" : ""}`, "aria-label": [ep.title, meta].filter(Boolean).join(", ") }, media, h("strong", null, ep.title), meta ? h("small", null, meta) : null);
+      const b = h(
+        "button",
+        {
+          type: "button",
+          class: `tv-card${ep.id === this.core.current?.next?.id ? " is-selected" : ""}`,
+          "aria-label": [ep.title, meta].filter(Boolean).join(", ")
+        },
+        media,
+        h("strong", null, ep.title),
+        meta ? h("small", null, meta) : null
+      );
       b.addEventListener("click", (e) => {
         e.stopPropagation();
         this.closeWatch();
@@ -798,7 +898,11 @@ export class TvPlayer {
       });
       return b;
     });
-    this.watchEl.append(h("div", { class: "tv-watch-head" }, icon("watchnext"), h("span", null, t("watchNext"))), h("hr", { class: "tv-watch-rule" }), h("div", { class: "tv-watch-row", "data-scroll": "" }, ...cards));
+    this.watchEl.append(
+      h("div", { class: "tv-watch-head" }, icon("watchnext"), h("span", null, t("watchNext"))),
+      h("hr", { class: "tv-watch-rule" }),
+      h("div", { class: "tv-watch-row", "data-scroll": "" }, ...cards)
+    );
     cls(this.watchEl, "is-on", true);
     requestAnimationFrame(() => focusEl(cards.find((c) => c.classList.contains("is-selected")) ?? cards[0] ?? null));
   }

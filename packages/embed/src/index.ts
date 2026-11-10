@@ -109,7 +109,29 @@ export function startEmbed(container: HTMLElement, params: URLSearchParams) {
   };
 
   // core → host events
-  const forward: EventName[] = ["loadedmetadata", "play", "pause", "seeking", "seeked", "timeupdate", "progress", "volumechange", "ratechange", "qualitychange", "tracks", "markers", "skip", "nextepisode", "episode", "ended", "enterpip", "leavepip", "fullscreenchange", "error", "statechange"];
+  const forward: EventName[] = [
+    "loadedmetadata",
+    "play",
+    "pause",
+    "seeking",
+    "seeked",
+    "timeupdate",
+    "progress",
+    "volumechange",
+    "ratechange",
+    "qualitychange",
+    "tracks",
+    "markers",
+    "skip",
+    "nextepisode",
+    "episode",
+    "ended",
+    "enterpip",
+    "leavepip",
+    "fullscreenchange",
+    "error",
+    "statechange"
+  ];
   for (const ev of forward) core.on(ev as never, ((data: unknown) => emit(ev, data)) as never);
   core.on("ready", (d) => post("ready", { ...d, version: VERSION, playerClass, protocol: PROTOCOL_VERSION }));
   core.on("load", ({ media }) => {
@@ -125,9 +147,18 @@ export function startEmbed(container: HTMLElement, params: URLSearchParams) {
     if (raw !== undefined) {
       const r = validateDescriptor(raw);
       if (r.ok && r.value) void core.load(r.value, { autoplay: params.get("autoplay") !== "0" });
-      else core.reportError({ code: "E_DESCRIPTOR_INVALID", message: r.errors[0] ?? "The media descriptor is not valid.", recoverable: false });
+      else
+        core.reportError({
+          code: "E_DESCRIPTOR_INVALID",
+          message: r.errors[0] ?? "The media descriptor is not valid.",
+          recoverable: false
+        });
     } else if (!framed || !targets.length) {
-      core.reportError({ code: "E_NO_SOURCES", message: "There's nothing to play. Add ?src=https://… or load media with the SDK.", recoverable: false });
+      core.reportError({
+        code: "E_NO_SOURCES",
+        message: "There's nothing to play. Add ?src=https://… or load media with the SDK.",
+        recoverable: false
+      });
     } else {
       core.idle();
     }
@@ -155,7 +186,8 @@ export function startEmbed(container: HTMLElement, params: URLSearchParams) {
     if (notAllowed) return;
     const cmd = parseCommand(e.data);
     if (typeof cmd === "string") {
-      if (e.data && typeof e.data === "object" && (e.data as { ns?: unknown }).ns === NS) reply(e.origin, (e.data as { id?: string }).id, false, undefined, cmd);
+      if (e.data && typeof e.data === "object" && (e.data as { ns?: unknown }).ns === NS)
+        reply(e.origin, (e.data as { id?: string }).id, false, undefined, cmd);
       return;
     }
     if (!limiter.take()) return reply(e.origin, cmd.id, false, undefined, "rate limited");
@@ -236,13 +268,23 @@ export function startEmbed(container: HTMLElement, params: URLSearchParams) {
       case "getDuration":
         return core.duration;
       case "getTracks":
-        return { audio: core.audioTracks, subtitles: core.subtitleTracks, activeAudio: core.audioTrack, activeSubtitle: core.subtitleTrack };
+        return {
+          audio: core.audioTracks,
+          subtitles: core.subtitleTracks,
+          activeAudio: core.audioTrack,
+          activeSubtitle: core.subtitleTrack
+        };
       case "getQualities":
         return { qualities: core.qualities, active: core.quality };
     }
   }
 
-  return { core, get playerClass() { return playerClass; } };
+  return {
+    core,
+    get playerClass() {
+      return playerClass;
+    }
+  };
 }
 
 function detectParentOrigin(): string | null {

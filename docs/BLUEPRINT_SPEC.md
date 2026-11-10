@@ -30,7 +30,7 @@ Numbered, testable values. `tu` = 1 px at 1920×1080 (`--tu: max(0.5px, min(100v
 | A22 | Panel slide | 240 ms, transform only | mission | `--dur-panel` |
 | A23 | Seek strip | side thumbs 512 tu wide, centre 548 tu with 3 tu white border, radius 8 tu, timestamps `HH:MM:SS` 18 tu bottom centre, 10 s apart | p19, p20 | `.tv-thumb` |
 | A24 | Seek bubble | pill, 26 tu delta + 20 tu target time | mission | `.tv-bubble` |
-| A25 | Hidden seek steps | 10 → 20 → 30 → 60 s per press within 1 s; commit after 700 ms | mission, D-014 | `seekStep()` |
+| A25 | Hidden seek steps | presses 1–4 add 10 s, 5–10 add 20 s, 11–18 add 30 s, then 60 s, while presses keep coming within 1 s; commit after 700 ms | mission, D-014 | `seekStep()` |
 | A26 | Advisory | "Rated U/A 16+" top left with a 4 tu accent bar, 6 s | p2 | `views.ts` advisory |
 | A27 | Language strip | bottom centre, current language in a pill with check, "Original" small, 6 s | p2 | `.tv-langs` |
 | A28 | Watch Next row | cards 16:9, 1.04 focus scale, progress bar under thumbnail | p5 | `.tv-card` |
