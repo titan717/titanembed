@@ -1,0 +1,24 @@
+{
+  "name": "titan-embed",
+  "version": "0.1.0",
+  "description": "Embeddable, brandable, ad-free video player with a 10-foot TV player and a touch-first mobile player.",
+  "license": "MIT",
+  "type": "module",
+  "repository": { "type": "git", "url": "git+https://github.com/titan717/titanembed.git", "directory": "packages/sdk" },
+  "homepage": "https://github.com/titan717/titanembed#readme",
+  "bugs": "https://github.com/titan717/titanembed/issues",
+  "keywords": ["video", "player", "embed", "hls", "android-tv", "tv", "iframe", "postmessage"],
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/types/sdk/src/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/types/sdk/src/index.d.ts", "import": "./dist/index.js" },
+    "./react": { "types": "./dist/types/sdk/src/react.d.ts", "import": "./dist/react.js" },
+    "./script": "./dist/titan-embed.min.js"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "peerDependencies": { "react": ">=17" },
+  "peerDependenciesMeta": { "react": { "optional": true } },
+  "publishConfig": { "access": "public", "provenance": true }
+}

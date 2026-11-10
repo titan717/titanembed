@@ -1,0 +1,11 @@
+node_modules
+dist
+dist-sdk
+.vercel
+test-results
+playwright-report
+public/media/*.mp4
+public/media/hls
+*.log
+.DS_Store
+site/docs/

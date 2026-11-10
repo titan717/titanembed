@@ -1,0 +1,15 @@
+import { chromium } from "@playwright/test";
+const [,, url, w, h, out] = process.argv;
+const b = await chromium.launch({ args: ["--autoplay-policy=no-user-gesture-required"] });
+const ctx = await b.newContext({ viewport: { width: +w, height: +h }, hasTouch: true, isMobile: true });
+const p = await ctx.newPage();
+const logs = [];
+p.on("pageerror", (e) => logs.push(`pageerror: ${e.message}`));
+p.on("console", (m) => m.type() === "error" && logs.push(m.text()));
+await p.goto(url);
+await p.waitForTimeout(2500);
+await p.touchscreen.tap(+w / 2, +h / 2);
+await p.waitForTimeout(500);
+await p.screenshot({ path: out });
+console.log(logs.join("\n"));
+await b.close();

@@ -1,0 +1,16 @@
+# Roadmap
+
+Every release ships at least four user-visible improvements plus one quality item, a GitHub Release, a CHANGELOG entry and a Vercel production deploy.
+
+| Version | Theme | Contents |
+| --- | --- | --- |
+| 0.1.0 | Foundation | Core state machine, HLS/MP4/WebM, captions renderer, TV player (blueprint chrome, panels, hidden seek, skip, next-up), mobile player (gestures, sheets, lock), embed page + postMessage bridge, SDK + React wrapper, demo, docs, CI. |
+| 0.2.0 | Blueprint fidelity | Pixel comparison against every blueprint page, gap fixes, focus-ring audit at 720p/1080p/4K, caption style presets. |
+| 0.3.0 | Mobile depth | Mini player, portrait sheets polish, gesture tuning on real touch traces, haptics map, iPad layouts. |
+| 0.4.0 | Resilience | Offline/online recovery, stall backoff tuning, source failover reporting, memory soak tests in CI. |
+| 0.5.0 | Accessibility | axe in CI for every state, screen-reader announcements, high-contrast captions, keyboard parity on mobile. |
+| 0.6.0 | Episodes | Episode lists in both players, up-next queue, autoplay rules, sleep timer polish. |
+| 0.7.0 | Adapters | Source adapter registry, documented-embed adapter examples, host-supplied catalogues. |
+| 0.8.0 | Performance | Budgets tightened, first-frame time tracking in e2e, low-end TV profile. |
+| 0.9.0 | Release candidate | Security review, docs complete, migration notes for Panda.fun. |
+| 1.0.0 | Production | FINAL_REPORT, PANDA_ADOPTION, npm publish with provenance. |

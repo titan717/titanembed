@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content="Titan Embed: an ad-free, embeddable video player with a 10-foot TV player for remotes and a touch-first mobile player." />
+    <title>Titan Embed — a TV player and a mobile player in one embed</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="bar">
+      <a class="brand" href="/" aria-label="Titan Embed home"><span class="brand-mark" id="brand-mark"></span>Titan Embed</a>
+      <nav aria-label="Main">
+        <a href="/docs/">Docs</a>
+        <a href="/docs/api.html">API</a>
+        <a href="https://github.com/titan717/titanembed">GitHub</a>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="intro">
+        <h1>One embed. A TV player for the remote, a mobile player for the thumb.</h1>
+        <p class="lede">Titan Embed picks the right player for the screen it lands on. No ads, no trackers, no cookies — just HLS, MP4 and WebM with captions, audio tracks, skip markers and a typed postMessage API.</p>
+      </section>
+
+      <section class="stage" aria-label="Live player">
+        <div class="controls" role="group" aria-label="Demo options">
+          <fieldset>
+            <legend>Device</legend>
+            <div class="seg" id="device"></div>
+          </fieldset>
+          <fieldset>
+            <legend>Video</legend>
+            <div class="seg" id="media"></div>
+          </fieldset>
+          <fieldset>
+            <legend>Accent</legend>
+            <div class="seg" id="accent"></div>
+          </fieldset>
+        </div>
+        <div class="frame-wrap" id="frame-wrap">
+          <div class="frame" id="frame"></div>
+        </div>
+        <p class="hint" id="hint"></p>
+      </section>
+
+      <section class="split">
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Drive it from the page</h2>
+          </div>
+          <div class="cmds" id="cmds"></div>
+          <h3>Events</h3>
+          <ol class="log" id="log" aria-live="off"></ol>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <h2>Embed code</h2>
+            <button class="copy" id="copy" type="button">Copy</button>
+          </div>
+          <div class="tabs" id="code-tabs" role="tablist"></div>
+          <pre class="code"><code id="code"></code></pre>
+          <p class="small">The iframe needs <code>allow-scripts allow-same-origin</code> in its sandbox, and the commands only work for origins you list in <code>origins</code>. See <a href="/docs/security.html">Security</a>.</p>
+        </div>
+      </section>
+
+      <section class="features" aria-label="Features">
+        <article>
+          <h3>Player A · TV</h3>
+          <p>Built for the 10-foot view: D-pad focus with a visible scale, hidden seeking that adds up 10, 20, 30 and 60 seconds, Back that closes a panel before it exits, and key codes for Android TV, Fire TV, Tizen and webOS.</p>
+        </article>
+        <article>
+          <h3>Player B · Mobile</h3>
+          <p>Thumb-first: double-tap to skip 10 seconds, swipe to seek, slide for brightness and volume, hold for 2×, pinch to fill, a lock button, bottom sheets in portrait and safe areas everywhere.</p>
+        </article>
+        <article>
+          <h3>Shared core</h3>
+          <p>One state machine, HLS with hls.js loaded only when needed, quality and audio menus, a safe WebVTT and SRT parser, resume, intro, recap and credits skipping, and recovery from stalls.</p>
+        </article>
+        <article>
+          <h3>Private by default</h3>
+          <p>No analytics, cookies or third-party scripts. Strict CSP, an origin allowlist for commands and a validated media descriptor that never inserts HTML.</p>
+        </article>
+      </section>
+    </main>
+    <footer class="foot">
+      <span>MIT licensed · <span id="ver"></span></span>
+      <span>Test media: Titan test clip (generated), Big Buck Bunny and Tears of Steel © Blender Foundation, CC BY. <a href="/docs/assets.html">Credits</a></span>
+    </footer>
+    <script type="module" src="./demo.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,36 @@
+WEBVTT
+
+00:00:01.000 --> 00:00:03.800
+This is the Titan Embed test clip.
+
+00:00:04.000 --> 00:00:07.000
+The intro runs from 0:04 to 0:14.
+Press Skip Intro to jump past it.
+
+00:00:08.000 --> 00:00:11.000 line:10%
+<b>Bold</b>, <i>italic</i> and <u>underlined</u> cues
+are drawn by Titan's own caption renderer.
+
+00:00:15.000 --> 00:00:19.000
+The main part starts here.
+
+00:00:20.000 --> 00:00:24.000
+<v Narrator>Voice spans keep the speaker's name.</v>
+
+00:00:25.000 --> 00:00:29.000
+Captions move up while the controls are visible.
+
+00:00:30.000 --> 00:00:34.000
+Switch to Spanish in Audio &amp; Subtitles.
+
+00:00:35.000 --> 00:00:39.000
+Markup such as <script>alert(1)</script> is shown as text, never run.
+
+00:00:40.000 --> 00:00:44.000
+Change the size, colour and background in Caption style.
+
+00:00:45.000 --> 00:00:49.000
+The credits start at 0:50.
+
+00:00:50.000 --> 00:00:54.000
+Thanks for testing Titan Embed.

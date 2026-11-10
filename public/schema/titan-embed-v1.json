@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Titan Embed postMessage protocol",
+  "version": 1,
+  "namespace": "titan",
+  "envelope": {
+    "ns": "titan",
+    "v": 1,
+    "type": [
+      "command",
+      "event",
+      "response"
+    ],
+    "id": "string ≤ 64 chars (commands and responses)"
+  },
+  "commands": {
+    "load": {
+      "args": "object",
+      "doc": "Load a new media descriptor. args: { media, autoplay? }"
+    },
+    "play": {
+      "args": "none",
+      "doc": "Start or resume playback."
+    },
+    "pause": {
+      "args": "none",
+      "doc": "Pause playback."
+    },
+    "seek": {
+      "args": "number",
+      "min": 0,
+      "max": 86400,
+      "doc": "Seek to an absolute time in seconds."
+    },
+    "setVolume": {
+      "args": "number",
+      "min": 0,
+      "max": 1,
+      "doc": "Volume from 0 to 1."
+    },
+    "setMuted": {
+      "args": "boolean",
+      "doc": "Mute or unmute."
+    },
+    "setRate": {
+      "args": "number",
+      "min": 0.25,
+      "max": 3,
+      "doc": "Playback rate from 0.25 to 3."
+    },
+    "setAudioTrack": {
+      "args": "string",
+      "doc": "Audio track id from getTracks()."
+    },
+    "setSubtitleTrack": {
+      "args": "string|null",
+      "doc": "Subtitle track id, or null for Off."
+    },
+    "setQuality": {
+      "args": "string",
+      "doc": "Quality id from getQualities() (\"auto\", \"1080\", \"data-saver\", …)."
+    },
+    "setTheme": {
+      "args": "object",
+      "doc": "Theme overrides: { accent, logo, radius, font, controlsOpacity }."
+    },
+    "setMarkers": {
+      "args": "object",
+      "doc": "{ markers: [{ type: intro|recap|credits, start, end }] }"
+    },
+    "enterFullscreen": {
+      "args": "none",
+      "doc": "Enter fullscreen (needs a user gesture in most browsers)."
+    },
+    "exitFullscreen": {
+      "args": "none",
+      "doc": "Leave fullscreen."
+    },
+    "enterPip": {
+      "args": "none",
+      "doc": "Enter picture-in-picture (needs a user gesture in most browsers)."
+    },
+    "next": {
+      "args": "none",
+      "doc": "Start the next episode."
+    },
+    "previous": {
+      "args": "none",
+      "doc": "Restart, or go to the previous episode within the first 5 seconds."
+    },
+    "destroy": {
+      "args": "none",
+      "doc": "Stop playback and release every resource."
+    },
+    "getState": {
+      "args": "none",
+      "doc": "Returns the playback state."
+    },
+    "getTime": {
+      "args": "none",
+      "doc": "Returns the current time in seconds."
+    },
+    "getDuration": {
+      "args": "none",
+      "doc": "Returns the duration in seconds."
+    },
+    "getTracks": {
+      "args": "none",
+      "doc": "Returns { audio, subtitles, activeAudio, activeSubtitle }."
+    },
+    "getQualities": {
+      "args": "none",
+      "doc": "Returns { qualities, active }."
+    }
+  },
+  "events": [
+    "ready",
+    "loadedmetadata",
+    "play",
+    "pause",
+    "seeking",
+    "seeked",
+    "timeupdate",
+    "progress",
+    "volumechange",
+    "ratechange",
+    "qualitychange",
+    "tracks",
+    "markers",
+    "skip",
+    "nextepisode",
+    "episode",
+    "ended",
+    "enterpip",
+    "leavepip",
+    "fullscreenchange",
+    "error",
+    "playerclass",
+    "statechange",
+    "exit",
+    "report"
+  ]
+}

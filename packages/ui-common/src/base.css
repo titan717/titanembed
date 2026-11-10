@@ -1,0 +1,674 @@
+/* Titan Embed shared player styles. Values come from tokens only (docs/BLUEPRINT_SPEC.md). */
+.titan {
+  /* palette */
+  --c-black: #000;
+  --c-white: #fff;
+  --c-text: #fff;
+  --c-text-2: rgba(255, 255, 255, 0.7);
+  --c-text-3: rgba(255, 255, 255, 0.5);
+  --c-track: rgba(255, 255, 255, 0.3);
+  --c-buffer: rgba(255, 255, 255, 0.5);
+  --c-scrim: rgba(0, 0, 0, 0.6);
+  --c-danger: #ff6b6b;
+  --c-advisory: #20c4e8;
+  --accent: var(--t-accent, #fff);
+  --on-accent: var(--t-on-accent, #000);
+  --font: var(--t-font, "Inter Variable", Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
+  /* motion */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-fast: 140ms;
+  --dur: 200ms;
+  --dur-panel: 240ms;
+  /* defaults overridden per player */
+  --u: 1px;
+  --fs-title: calc(18 * var(--u));
+  --fs-body: calc(15 * var(--u));
+  --fs-small: calc(13 * var(--u));
+  --btn-h: calc(44 * var(--u));
+  --btn-r: calc(8 * var(--u));
+  --gap: calc(12 * var(--u));
+  --safe-t: 0px;
+  --safe-r: 0px;
+  --safe-b: 0px;
+  --safe-l: 0px;
+  --pad-x: calc(16 * var(--u));
+  --pad-y: calc(16 * var(--u));
+  --modal-bg: rgba(16, 18, 24, 0.94);
+  --focus-ring: 0 0 0 calc(3 * var(--u)) var(--c-white);
+
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--c-black);
+  color: var(--c-text);
+  font-family: var(--font);
+  font-size: var(--fs-body);
+  line-height: 1.35;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+  contain: strict;
+}
+.titan *,
+.titan *::before,
+.titan *::after {
+  box-sizing: border-box;
+}
+.titan button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.titan button:focus {
+  outline: none;
+}
+.titan [hidden] {
+  display: none !important;
+}
+.titan p,
+.titan h2,
+.titan h3 {
+  margin: 0;
+}
+.t-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: var(--c-black);
+}
+.t-icon {
+  width: calc(24 * var(--u));
+  height: calc(24 * var(--u));
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.t-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.t-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* generic button */
+.t-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(8 * var(--u));
+  min-height: var(--btn-h);
+  padding: 0 calc(20 * var(--u));
+  border-radius: var(--t-radius-host, var(--btn-r));
+  background: rgba(255, 255, 255, 0.12);
+  border: calc(2 * var(--u)) solid transparent !important;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    transform var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease);
+}
+.t-btn.is-primary {
+  background: var(--c-white);
+  color: #0f1014;
+}
+.t-btn:focus-visible,
+.t-btn.is-focus {
+  border-color: var(--c-white) !important;
+  box-shadow: 0 0 calc(18 * var(--u)) rgba(255, 255, 255, 0.18);
+}
+.t-btn.is-primary:focus-visible,
+.t-btn.is-primary.is-focus {
+  box-shadow: var(--focus-ring), 0 0 calc(18 * var(--u)) rgba(255, 255, 255, 0.25);
+  border-color: #0f1014 !important;
+}
+
+/* layers shown with .is-on; transform/opacity only */
+.t-loading,
+.t-buffering,
+.t-modal,
+.t-offline,
+.t-unmute,
+.t-skip,
+.t-next,
+.t-advisory,
+.t-toast {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--dur) var(--ease),
+    transform var(--dur) var(--ease),
+    visibility 0s linear var(--dur);
+}
+.t-loading.is-on,
+.t-buffering.is-on,
+.t-modal.is-on,
+.t-offline.is-on,
+.t-unmute.is-on,
+.t-skip.is-on,
+.t-next.is-on,
+.t-advisory.is-on,
+.t-toast.is-on {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity var(--dur) var(--ease),
+    transform var(--dur) var(--ease),
+    visibility 0s;
+}
+
+/* loading */
+.t-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  background: var(--c-black);
+}
+.t-loading-art {
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+}
+.t-loading-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.85) 75%);
+}
+.t-loading-center {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(18 * var(--u));
+  text-align: center;
+  padding: 0 var(--pad-x);
+}
+.t-mark {
+  width: calc(56 * var(--u));
+  height: calc(56 * var(--u));
+  color: var(--c-white);
+}
+.t-loading-logo {
+  max-width: calc(320 * var(--u));
+  max-height: calc(96 * var(--u));
+  object-fit: contain;
+}
+.t-loading-title {
+  font-size: var(--fs-title);
+  font-weight: 700;
+  max-width: 80vw;
+}
+.t-loading-title:empty {
+  display: none;
+}
+.t-ring-spin {
+  width: calc(44 * var(--u));
+  height: calc(44 * var(--u));
+  border-radius: 50%;
+  border: calc(3 * var(--u)) solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--c-white);
+  animation: t-spin 0.9s linear infinite;
+}
+@keyframes t-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.t-buffering {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.t-buffering .t-ring-spin {
+  width: calc(64 * var(--u));
+  height: calc(64 * var(--u));
+}
+
+/* modal states: error, resume, ended */
+.t-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  background: var(--c-scrim);
+  padding: var(--pad-y) var(--pad-x);
+}
+.t-modal-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(14 * var(--u));
+  max-width: calc(640 * var(--u));
+  text-align: center;
+  transform: translateY(calc(12 * var(--u)));
+  transition: transform var(--dur-panel) var(--ease);
+}
+.t-modal.is-on .t-modal-card {
+  transform: none;
+}
+.t-modal-icon {
+  width: calc(40 * var(--u));
+  height: calc(40 * var(--u));
+  color: var(--c-white);
+}
+.t-modal-title {
+  font-size: var(--fs-title);
+  font-weight: 700;
+}
+.t-modal-body {
+  color: var(--c-text-2);
+}
+.t-modal-code {
+  font-size: var(--fs-small);
+  color: var(--c-text-3);
+  font-variant-numeric: tabular-nums;
+}
+.t-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--gap);
+  margin-top: calc(8 * var(--u));
+}
+
+/* offline */
+.t-offline {
+  position: absolute;
+  z-index: 35;
+  top: calc(var(--pad-y) + var(--safe-t));
+  left: 50%;
+  transform: translate(-50%, calc(-8 * var(--u)));
+  display: flex;
+  align-items: center;
+  gap: calc(12 * var(--u));
+  padding: calc(10 * var(--u)) calc(18 * var(--u));
+  border-radius: calc(12 * var(--u));
+  background: var(--modal-bg);
+  font-size: var(--fs-small);
+  max-width: calc(100% - 2 * var(--pad-x));
+}
+.t-offline.is-on {
+  transform: translate(-50%, 0);
+}
+.t-offline div {
+  display: flex;
+  flex-direction: column;
+}
+.t-offline span {
+  color: var(--c-text-2);
+}
+
+/* unmute prompt */
+.t-unmute {
+  position: absolute;
+  z-index: 25;
+  top: calc(var(--pad-y) + var(--safe-t));
+  left: calc(var(--pad-x) + var(--safe-l));
+  background: var(--modal-bg);
+}
+
+/* skip */
+.t-skip {
+  position: absolute;
+  z-index: 22;
+  right: calc(var(--pad-x) + var(--safe-r));
+  bottom: var(--skip-bottom, calc(96 * var(--u)));
+  min-height: var(--btn-h);
+  padding: 0 calc(24 * var(--u));
+  border-radius: var(--t-radius-host, var(--btn-r));
+  background: rgba(20, 22, 28, 0.82);
+  border: calc(2 * var(--u)) solid rgba(255, 255, 255, 0.6) !important;
+  font-weight: 700;
+  transform: translateY(calc(8 * var(--u)));
+  transition:
+    opacity var(--dur) var(--ease),
+    transform var(--dur) var(--ease),
+    bottom var(--dur) var(--ease),
+    visibility 0s linear var(--dur);
+}
+.t-skip.is-on {
+  transform: none;
+}
+.t-skip:focus-visible,
+.t-skip.is-focus {
+  background: var(--c-white);
+  color: #0f1014;
+  border-color: var(--c-white) !important;
+}
+
+/* next-up card */
+.t-next {
+  position: absolute;
+  z-index: 24;
+  right: calc(var(--pad-x) + var(--safe-r));
+  bottom: var(--skip-bottom, calc(96 * var(--u)));
+  display: flex;
+  gap: calc(16 * var(--u));
+  width: min(calc(560 * var(--u)), calc(100% - 2 * var(--pad-x)));
+  padding: calc(14 * var(--u));
+  border-radius: calc(12 * var(--u));
+  background: var(--modal-bg);
+  transform: translateY(calc(12 * var(--u)));
+}
+.t-next.is-on {
+  transform: none;
+}
+.t-next-thumb {
+  flex: none;
+  width: 40%;
+  aspect-ratio: 16 / 9;
+  border-radius: calc(8 * var(--u));
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+.t-next-thumb.is-empty {
+  display: none;
+}
+.t-next-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: calc(4 * var(--u));
+}
+.t-next-eyebrow {
+  font-size: var(--fs-small);
+  color: var(--c-text-2);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.t-next-title {
+  font-weight: 700;
+  font-size: var(--fs-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.t-next-sub {
+  font-size: var(--fs-small);
+  color: var(--c-text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.t-next-sub:empty {
+  display: none;
+}
+.t-next-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(10 * var(--u));
+  margin-top: auto;
+  padding-top: calc(8 * var(--u));
+}
+.t-countdown-wrap {
+  position: relative;
+  width: calc(28 * var(--u));
+  height: calc(28 * var(--u));
+  display: grid;
+  place-items: center;
+}
+.t-countdown {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+.t-countdown circle {
+  fill: none;
+  stroke-width: 4;
+}
+.t-countdown-track {
+  stroke: rgba(15, 16, 20, 0.2);
+}
+.t-countdown-ring {
+  stroke: #0f1014;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+.t-countdown-n {
+  position: relative;
+  font-size: calc(12 * var(--u));
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* advisory (TV PLAYER blueprint p5) */
+.t-advisory {
+  position: absolute;
+  z-index: 21;
+  top: calc(var(--pad-y) + var(--safe-t) + var(--advisory-top, 0px));
+  left: calc(var(--pad-x) + var(--safe-l));
+  display: flex;
+  gap: calc(14 * var(--u));
+  align-items: stretch;
+  transform: translateX(calc(-12 * var(--u)));
+  pointer-events: none;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+.t-advisory.is-on {
+  transform: none;
+}
+.t-advisory-bar {
+  width: calc(4 * var(--u));
+  border-radius: calc(2 * var(--u));
+  background: var(--c-advisory);
+}
+.t-advisory-rating {
+  font-size: calc(var(--fs-body) * 1.1);
+  font-weight: 700;
+}
+.t-advisory-desc {
+  font-size: var(--fs-small);
+  color: var(--c-text-2);
+}
+
+/* toast */
+.t-toast {
+  position: absolute;
+  z-index: 45;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.96);
+  padding: calc(12 * var(--u)) calc(20 * var(--u));
+  border-radius: calc(12 * var(--u));
+  background: var(--modal-bg);
+  font-weight: 600;
+  pointer-events: none;
+  max-width: calc(100% - 2 * var(--pad-x));
+  text-align: center;
+}
+.t-toast.is-on {
+  transform: translate(-50%, -50%);
+}
+
+/* captions: lift above the controls while they are visible */
+.t-captions {
+  position: absolute;
+  z-index: 10;
+  left: 6%;
+  right: 6%;
+  bottom: calc(var(--cap-bottom, 7%) + var(--safe-b));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2em;
+  text-align: center;
+  pointer-events: none;
+  font-size: calc(var(--cap-base, 3.6vh) * var(--cap-scale, 1));
+  line-height: 1.3;
+  font-weight: 500;
+  color: var(--cap-color, #fff);
+  transition: bottom var(--dur) var(--ease);
+}
+.titan.is-controls .t-captions {
+  bottom: calc(var(--cap-lift, 22%) + var(--safe-b));
+}
+.t-cue {
+  display: inline;
+  padding: 0.08em 0.4em;
+  border-radius: 0.15em;
+  background: var(--cap-bg, transparent);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  text-shadow: var(--cap-edge, 0 0 0.12em rgba(0, 0, 0, 0.9), 0 0.05em 0.2em rgba(0, 0, 0, 0.9));
+  max-width: 100%;
+  white-space: pre-wrap;
+}
+.t-cue .i {
+  font-style: italic;
+}
+.t-cue .b {
+  font-weight: 700;
+}
+.t-cue .u {
+  text-decoration: underline;
+}
+.cap-s-s {
+  --cap-scale: 0.8;
+}
+.cap-s-m {
+  --cap-scale: 1;
+}
+.cap-s-l {
+  --cap-scale: 1.25;
+}
+.cap-s-xl {
+  --cap-scale: 1.5;
+}
+.cap-c-white {
+  --cap-color: #fff;
+}
+.cap-c-yellow {
+  --cap-color: #ffe14d;
+}
+.cap-c-cyan {
+  --cap-color: #6fe6ff;
+}
+.cap-c-green {
+  --cap-color: #7dff9a;
+}
+.cap-bg-none {
+  --cap-bg: transparent;
+}
+.cap-bg-dim {
+  --cap-bg: rgba(0, 0, 0, 0.55);
+}
+.cap-bg-box {
+  --cap-bg: #000;
+}
+.cap-e-shadow {
+  --cap-edge: 0 0 0.12em rgba(0, 0, 0, 0.9), 0 0.05em 0.2em rgba(0, 0, 0, 0.9);
+}
+.cap-e-outline {
+  --cap-edge: -0.05em -0.05em 0 #000, 0.05em -0.05em 0 #000, -0.05em 0.05em 0 #000, 0.05em 0.05em 0 #000;
+}
+.cap-e-none {
+  --cap-edge: none;
+}
+.t-cap-preview {
+  position: relative;
+  height: calc(96 * var(--u));
+  border-radius: calc(8 * var(--u));
+  background: linear-gradient(135deg, #2a3550, #10131c);
+  overflow: hidden;
+}
+.t-cap-preview .t-captions {
+  position: absolute;
+  bottom: 20%;
+  font-size: calc(22 * var(--u) * var(--cap-scale, 1));
+}
+
+/* progress track (shared) */
+.t-track {
+  position: relative;
+  height: var(--track-h, calc(4 * var(--u)));
+  border-radius: 999px;
+  background: var(--c-track);
+}
+.t-track-buf,
+.t-track-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  border-radius: inherit;
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+.t-track-buf {
+  background: var(--c-buffer);
+}
+.t-track-fill {
+  background: var(--accent);
+}
+.t-track-knob {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: var(--knob, calc(16 * var(--u)));
+  height: var(--knob, calc(16 * var(--u)));
+  margin: calc(var(--knob, calc(16 * var(--u))) / -2) 0 0 calc(var(--knob, calc(16 * var(--u))) / -2);
+  border-radius: 50%;
+  background: var(--accent);
+  transition:
+    width var(--dur-fast) var(--ease),
+    height var(--dur-fast) var(--ease),
+    margin var(--dur-fast) var(--ease);
+}
+.t-track-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: inherit;
+}
+.t-track-chapter {
+  position: absolute;
+  top: -1px;
+  bottom: -1px;
+  width: calc(3 * var(--u));
+  background: var(--c-black);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .titan *,
+  .titan *::before,
+  .titan *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  .t-ring-spin {
+    animation: t-spin 2.4s linear infinite !important;
+  }
+}

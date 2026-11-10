@@ -1,0 +1,33 @@
+1
+00:00:01,000 --> 00:00:03,800
+Este es el clip de prueba de Titan Embed.
+
+2
+00:00:04,000 --> 00:00:07,000
+La introducción va de 0:04 a 0:14.
+Pulsa Saltar intro para pasarla.
+
+3
+00:00:08,000 --> 00:00:11,000
+<b>Negrita</b>, <i>cursiva</i> y <u>subrayado</u>
+los dibuja el propio renderizador de Titan.
+
+4
+00:00:15,000 --> 00:00:19,000
+Aquí empieza la parte principal.
+
+5
+00:00:25,000 --> 00:00:29,000
+Los subtítulos suben cuando se ven los controles.
+
+6
+00:00:30,000 --> 00:00:34,000
+Cambia el audio a español en Audio y subtítulos.
+
+7
+00:00:45,000 --> 00:00:49,000
+Los créditos empiezan en 0:50.
+
+8
+00:00:50,000 --> 00:00:54,000
+Gracias por probar Titan Embed.

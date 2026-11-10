@@ -1,0 +1,46 @@
+{
+  "name": "titanembed-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Titan Embed: an embeddable, brandable video player with a TV player and a mobile player",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:site && npm run build:sdk && node scripts/copy-sdk.mjs",
+    "build:site": "node scripts/build-docs.mjs && vite build",
+    "build:sdk": "vite build -c vite.sdk.config.ts && vite build -c vite.sdk.config.ts --mode iife && tsc -p packages/sdk/tsconfig.build.json",
+    "preview": "vite preview --port 4173 --strictPort",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --check \"packages/**/*.{ts,tsx,css}\"",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "e2e": "playwright test",
+    "budget": "node scripts/check-budget.mjs",
+    "media": "bash scripts/gen-media.sh",
+    "licenses": "node scripts/licenses.mjs",
+    "schema": "node scripts/gen-schema.mjs",
+    "check": "npm run lint && npm run typecheck && npm test && node scripts/gen-schema.mjs --check"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "5.3.0",
+    "hls.js": "1.7.4"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@eslint/js": "9.39.5",
+    "@playwright/test": "1.65.0",
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "eslint": "9.39.5",
+    "globals": "16.5.0",
+    "happy-dom": "21.0.4",
+    "marked": "18.2.0",
+    "prettier": "3.9.10",
+    "react": "19.3.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.1",
+    "vite": "7.3.7",
+    "vitest": "4.1.12"
+  }
+}
