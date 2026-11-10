@@ -1,0 +1,36 @@
+# Security
+
+What Titan Embed protects, how, and the tests that prove it. Viewer-facing summary: apps/docs/security.md (published at /docs/security.html).
+
+## Threat model
+
+| Threat | Defence | Test |
+| --- | --- | --- |
+| A hostile page frames the player and drives it | Commands are accepted only when the sender is the parent window and its origin is in `origins=`. Without `origins`, commands are ignored. | tests/e2e/api.spec.ts "a host outside the allowlist…" |
+| A hostile page frames a player meant for one site | `origins=` + `location.ancestorOrigins`/referrer check shows `E_NOT_ALLOWED_HERE` and sends no events. Self-hosters can also narrow `frame-ancestors`. | tests/e2e/api.spec.ts |
+| Event data leaks to other origins | Events are posted only to allowlisted origins that match the parent, never `'*'`. | tests/e2e/api.spec.ts (no events reach the unlisted host) |
+| Message floods | Token bucket, 30/s with bursts of 60; excess commands get `rate limited`. | tests/e2e/api.spec.ts "rate limiting rejects floods", tests/unit/protocol.test.ts |
+| Malformed or oversized commands | Schema validation (`parseCommand`): known names only (no prototype keys), typed and ranged args, ids ≤ 64 chars, payloads ≤ 256 kB. | tests/unit/protocol.test.ts |
+| Script injection through titles, descriptions, captions | All text goes through `textContent`; subtitles are parsed into text spans (b/i/u only) and never become HTML. | tests/e2e/api.spec.ts "hostile descriptor values…", tests/unit/subtitles.test.ts |
+| Dangerous URLs (`javascript:`, `data:`, `file:`, foreign `http:`) | `safeUrl` keeps only `https:`, `blob:` and same-origin URLs; control characters and over-long URLs are rejected. | tests/unit/descriptor.test.ts |
+| Resource exhaustion from subtitles | 2 MB file cap, 20 000 cues, 400 chars per line, 6 lines per cue. | tests/unit/subtitles.test.ts |
+| Prototype pollution through JSON | Descriptor validation copies known fields only. | tests/unit/descriptor.test.ts |
+| Theme CSS injection | Accent must be `#rgb`/`#rrggbb`; radius, font and opacity are enums or clamped numbers; low-contrast accents fall back. | tests/unit/descriptor.test.ts, tests/unit/misc.test.ts |
+| Popups and top navigation | The player never calls `window.open` or navigates `top`; it works inside `sandbox="allow-scripts allow-same-origin"`. | Code search in docs/CODE_REVIEW.md; the demo frames it sandboxed. |
+| Third-party tracking | No third-party requests at all: fonts, hls.js and icons are bundled; CSP `script-src 'self'`. No cookies; preferences in `localStorage` of the embed origin. | CSP header; tests/e2e run with no external network for the test clip. |
+| Supply chain | Exact-pinned dependencies, lockfile, `npm audit --audit-level=high --omit=dev` and a license allowlist (`npm run licenses`) in CI; npm publish with provenance. | .github/workflows/ci.yml |
+
+## Headers (vercel.json)
+
+- Site pages: `Content-Security-Policy` with `default-src 'self'`, `frame-ancestors 'self'`, `X-Frame-Options: SAMEORIGIN`, `Cross-Origin-Opener-Policy: same-origin`.
+- `/embed/`: `default-src 'none'` with only what playback needs (`script-src 'self'`, `media-src 'self' https: blob:`, `connect-src 'self' https:`, `worker-src 'self' blob:` for the hls.js worker, `font-src 'self'`) and `frame-ancestors *` (D-021).
+- Everywhere: `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, HSTS, and a `Permissions-Policy` that denies camera, microphone, geolocation, payment, USB, FLoC and Topics.
+- No `unsafe-inline`, no `unsafe-eval`; the code has no `eval`, `new Function` or `innerHTML` with outside data.
+
+## SRI
+
+Each release publishes `dist/sdk/sri.json` with the sha384 hash of the versioned script, and the docs show the matching `<script integrity=…>` tag.
+
+## Reporting
+
+Use [GitHub private vulnerability reporting](https://github.com/titan717/titanembed/security/advisories/new).

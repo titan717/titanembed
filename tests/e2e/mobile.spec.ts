@@ -54,6 +54,23 @@ test.describe("Player B (mobile)", () => {
     await expect(sheet).toBeHidden();
   });
 
+  test("dragging a sheet's title bar down dismisses it", async ({ page }) => {
+    await page.goto(embedUrl({ t: "20" }));
+    await waitPlaying(page);
+    const vp = page.viewportSize()!;
+    if (!/is-controls/.test((await page.locator(".titan").getAttribute("class")) ?? "")) await tap(page, vp.width / 2, vp.height * 0.35);
+    await page.getByRole("button", { name: "Settings" }).tap();
+    const sheet = page.getByRole("dialog");
+    await expect(sheet).toBeVisible();
+    await page.waitForTimeout(300);
+    const box = (await sheet.locator(".m-sheet-title").boundingBox())!;
+    await page.mouse.move(box.x + 10, box.y + box.height / 2);
+    await page.mouse.down();
+    for (let i = 1; i <= 8; i++) await page.mouse.move(box.x + 10, box.y + box.height / 2 + i * 40);
+    await page.mouse.up();
+    await expect(sheet).toBeHidden();
+  });
+
   test("play button pauses and resumes", async ({ page }) => {
     await page.goto(embedUrl({ t: "20" }));
     await waitPlaying(page);

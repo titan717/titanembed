@@ -5,7 +5,7 @@ Every release ships at least four user-visible improvements plus one quality ite
 | Version | Theme | Contents |
 | --- | --- | --- |
 | 0.1.0 | Foundation | Core state machine, HLS/MP4/WebM, captions renderer, TV player (blueprint chrome, panels, hidden seek, skip, next-up), mobile player (gestures, sheets, lock), embed page + postMessage bridge, SDK + React wrapper, demo, docs, CI. |
-| 0.2.0 | Blueprint fidelity | Pixel comparison against every blueprint page, gap fixes, focus-ring audit at 720p/1080p/4K, caption style presets. |
+| 0.2.0 | Blueprint fidelity + URL parity | Pixel comparison against every blueprint page, gap fixes, focus-ring audit at 720p/1080p/4K, caption style presets; URL params from docs/COMPETITIVE.md: `muted=1`, `autoskip=1`, `autonext=0`, `quality=720`, `seek=` step. |
 | 0.3.0 | Mobile depth | Mini player, portrait sheets polish, gesture tuning on real touch traces, haptics map, iPad layouts. |
 | 0.4.0 | Resilience | Offline/online recovery, stall backoff tuning, source failover reporting, memory soak tests in CI. |
 | 0.5.0 | Accessibility | axe in CI for every state, screen-reader announcements, high-contrast captions, keyboard parity on mobile. |

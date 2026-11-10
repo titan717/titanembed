@@ -488,6 +488,10 @@
   align-items: center;
   gap: 4px;
   min-height: 48px;
+  touch-action: none; /* the title bar is the drag handle for swipe-to-dismiss */
+}
+.m-grip {
+  touch-action: none;
 }
 .m-sheet-title {
   flex: 1;

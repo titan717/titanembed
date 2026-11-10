@@ -204,6 +204,7 @@ export class MobilePlayer {
       this.closeSheet();
     });
     this.sheetEl = h("div", { class: "m-sheet", role: "dialog", "aria-modal": "true" });
+    this.bindSheetSwipe();
 
     root.append(
       this.dim,
@@ -705,6 +706,38 @@ export class MobilePlayer {
     requestAnimationFrame(() =>
       this.sheetEl.querySelector<HTMLElement>(".m-row.is-selected, .m-row, .m-card")?.focus({ preventScroll: true })
     );
+  }
+
+  /** Drag the grip or title bar down (portrait) or right (landscape side sheet) to dismiss, like native sheets. */
+  private bindSheetSwipe() {
+    const el = this.sheetEl;
+    let start: { x: number; y: number; id: number; t: number } | null = null;
+    let offset = 0;
+    const portrait = () => this.root.classList.contains("is-portrait");
+    el.addEventListener("pointerdown", (e) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest(".m-grip, .m-sheet-head") || target.closest("button")) return;
+      start = { x: e.clientX, y: e.clientY, id: e.pointerId, t: performance.now() };
+      offset = 0;
+      el.setPointerCapture?.(e.pointerId);
+    });
+    el.addEventListener("pointermove", (e) => {
+      if (!start || e.pointerId !== start.id) return;
+      offset = Math.max(0, portrait() ? e.clientY - start.y : e.clientX - start.x);
+      el.style.transition = "none";
+      el.style.transform = portrait() ? `translateY(${offset}px)` : `translateX(${offset}px)`;
+    });
+    const end = (e: PointerEvent) => {
+      if (!start || e.pointerId !== start.id) return;
+      const size = portrait() ? el.offsetHeight : el.offsetWidth;
+      const fast = offset > 40 && performance.now() - start.t < 250;
+      start = null;
+      el.style.transition = "";
+      el.style.transform = "";
+      if (offset > size * 0.3 || fast) this.closeSheet();
+    };
+    el.addEventListener("pointerup", end);
+    el.addEventListener("pointercancel", end);
   }
 
   private openSub(make: () => MenuGroup) {
