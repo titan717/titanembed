@@ -107,7 +107,10 @@ const en = {
   notAllowed: "This player isn't enabled for this website.",
   stillThere: "Paused",
   dataSaver: "Data Saver",
-  upTo: "Up to {p}"
+  upTo: "Up to {p}",
+  source: "Source",
+  sourceSwitch: "Switching to {name}",
+  sourceNone: "None of the sources could play this title."
 };
 
 export type StringKey = keyof typeof en;

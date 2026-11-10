@@ -674,3 +674,101 @@
     animation: t-spin 2.4s linear infinite !important;
   }
 }
+
+/* provider sources (packages/sources): full-bleed under the overlay; driven providers never get input */
+.t-provider,
+.t-provider-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--c-black);
+}
+.t-provider,
+.t-provider-frame:not(.is-themed) {
+  pointer-events: none;
+  user-select: none;
+}
+.t-src-bar {
+  position: absolute;
+  z-index: 60;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: calc(8px + var(--safe-t)) calc(12px + var(--safe-r)) 8px calc(12px + var(--safe-l));
+  pointer-events: none;
+}
+.t-src-bar > * {
+  pointer-events: auto;
+}
+.t-src-group {
+  display: flex;
+  gap: 8px;
+}
+.titan .t-src-btn {
+  min-height: var(--btn-h);
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--modal-bg);
+  color: var(--c-text);
+  font: 500 var(--fs-small)/1 var(--font);
+  cursor: pointer;
+  transition: transform var(--dur) var(--ease);
+}
+.titan .t-src-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.t-src-menu {
+  position: absolute;
+  z-index: 61;
+  top: calc(60px + var(--safe-t));
+  right: calc(12px + var(--safe-r));
+  min-width: 220px;
+  padding: 6px;
+  border-radius: var(--btn-r);
+  background: var(--modal-bg);
+  list-style: none;
+  margin: 0;
+}
+.titan .t-src-menu button {
+  width: 100%;
+  min-height: var(--btn-h);
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--btn-r);
+  background: transparent;
+  color: var(--c-text);
+  font: 400 var(--fs-body)/1.2 var(--font);
+  text-align: start;
+  cursor: pointer;
+}
+.titan .t-src-menu button[aria-checked="true"] {
+  font-weight: 600;
+}
+.titan .t-src-menu button:hover,
+.titan .t-src-menu button:focus-visible {
+  background: var(--c-track);
+  outline: none;
+}
+.t-src-toast {
+  position: absolute;
+  z-index: 62;
+  left: 50%;
+  bottom: calc(24px + var(--safe-b));
+  transform: translateX(-50%);
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--modal-bg);
+  color: var(--c-text);
+  font: 500 var(--fs-small)/1.2 var(--font);
+  pointer-events: none;
+}

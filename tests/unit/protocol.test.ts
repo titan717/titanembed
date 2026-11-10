@@ -23,7 +23,9 @@ describe("parseCommand", () => {
       setQuality: "auto",
       load: { media: {} },
       setTheme: {},
-      setMarkers: { markers: [] }
+      setMarkers: { markers: [] },
+      loadSource: { tmdb: "550" },
+      setSource: "embedmaster"
     };
     for (const name of Object.keys(COMMANDS)) {
       const r = parseCommand(cmd(name, valid[name]));
@@ -43,6 +45,8 @@ describe("parseCommand", () => {
     expect(parseCommand(cmd("setVolume", 2))).toBeTypeOf("string");
     expect(parseCommand(cmd("setMuted", "yes"))).toBeTypeOf("string");
     expect(parseCommand(cmd("load", "https://x"))).toBeTypeOf("string");
+    expect(parseCommand(cmd("loadSource", "550"))).toBeTypeOf("string");
+    expect(parseCommand(cmd("setSource", 5))).toBeTypeOf("string");
     expect(parseCommand(cmd("setQuality", "x".repeat(100)))).toBeTypeOf("string");
     expect(parseCommand(cmd("play", undefined, { id: "x".repeat(65) }))).toBe("bad id");
   });

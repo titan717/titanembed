@@ -8,7 +8,6 @@ export * from "./keys";
 export * from "./device";
 export * from "./theme";
 export * from "./protocol";
-export * from "./adapters";
 export * as storage from "./storage";
 export { TitanCore } from "./engine";
 export type { CoreEvents, CoreOptions } from "./engine";

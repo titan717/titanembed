@@ -1,6 +1,7 @@
 ---
 title: SDK
 ---
+
 # SDK
 
 ```sh
@@ -11,27 +12,38 @@ npm install titan-embed
 
 `container` is an element or a selector. The player fills it; give it a size, for example `aspect-ratio: 16/9`.
 
-| Option | Type | Default |
-| --- | --- | --- |
-| `media` | `MediaDescriptor` | — (load later with `load()`) |
-| `player` | `"tv" \| "mobile" \| "auto"` | `"auto"` |
-| `autoplay` | `boolean` | `true` |
-| `theme` | `{ accent, logo, radius, font, controlsOpacity }` | player defaults |
-| `lang` | BCP 47 tag | browser language |
-| `resume` | `"prompt" \| "auto" \| "off"` | `"prompt"` |
-| `back` | `boolean` | `false` |
-| `stickyMini` | `boolean` — float a small player while the page scrolls past | `false` |
-| `embedUrl` | URL of a self-hosted embed page | `https://titanembed.vercel.app/embed/` |
-| `title` | iframe accessible name | `"Video player"` |
-| `timeout` | command timeout in ms | `8000` |
+| Option            | Type                                                                                                                                | Default                                   |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `media`           | `MediaDescriptor`                                                                                                                   | — (load later with `load()`)              |
+| `player`          | `"tv" \| "mobile" \| "auto"`                                                                                                        | `"auto"`                                  |
+| `autoplay`        | `boolean`                                                                                                                           | `true`                                    |
+| `theme`           | `{ accent, logo, radius, font, controlsOpacity }`                                                                                   | player defaults                           |
+| `lang`            | BCP 47 tag                                                                                                                          | browser language                          |
+| `resume`          | `"prompt" \| "auto" \| "off"`                                                                                                       | `"prompt"`                                |
+| `back`            | `boolean`                                                                                                                           | `false`                                   |
+| `stickyMini`      | `boolean` — float a small player while the page scrolls past                                                                        | `false`                                   |
+| `embedUrl`        | URL of a self-hosted embed page                                                                                                     | `https://titanembed.vercel.app/embed/`    |
+| `title`           | iframe accessible name                                                                                                              | `"Video player"`                          |
+| `timeout`         | command timeout in ms                                                                                                               | `8000`                                    |
+| `source`          | `{ tmdb \| imdb, type?, season?, episode?, title?, start? }` — a catalogue title played through the [source registry](sources.html) | —                                         |
+| `preferredSource` | source id, for example `"embedmaster"`                                                                                              | best measured source                      |
+| `sources`         | source ids to allow                                                                                                                 | all registered                            |
+| `sandbox`         | sandbox the player iframe                                                                                                           | `true` for `media`, `false` with `source` |
 
-The SDK creates `<iframe sandbox="allow-scripts allow-same-origin">`, passes your page's origin as the allowlist and only accepts messages from that iframe and origin.
+For `media`, the SDK creates `<iframe sandbox="allow-scripts allow-same-origin">`. Sandbox flags are inherited by every frame inside, and catalogue providers such as EmbedMaster refuse to play in a sandbox, so with `source` the player iframe is not sandboxed; Titan keeps the provider inert under its own UI instead ([Security](security.html)). Either way the SDK passes your page's origin as the allowlist and only accepts messages from that iframe and origin.
+
+```js
+const player = createPlayer("#player", { source: { tmdb: 550 }, preferredSource: "embedmaster" });
+player.on("sourcechange", ({ name, mode }) => console.log(`playing from ${name} (${mode})`));
+player.on("sourcefail", ({ id, next }) => console.log(`${id} failed, trying ${next}`));
+await player.loadSource({ tmdb: 1399, type: "tv", season: 1, episode: 2 });
+```
 
 ## Methods
 
 All methods return promises that settle with the player's response.
 
-`load(media, { autoplay })`, `play()`, `pause()`, `seek(seconds)`, `setVolume(0..1)`, `setMuted(bool)`, `setRate(rate)`, `setAudioTrack(id)`, `setSubtitleTrack(id | null)`, `setQuality(id)`, `setTheme(theme)`, `setMarkers(markers)`, `enterFullscreen()`, `exitFullscreen()`, `enterPip()`, `next()`, `previous()`, `getState()`, `getTime()`, `getDuration()`, `getTracks()`, `getQualities()`, `destroy()`.
+`load(media, { autoplay })`, `play()`, `pause()`, `seek(seconds)`, `setVolume(0..1)`, `setMuted(bool)`, `setRate(rate)`, `setAudioTrack(id)`, `setSubtitleTrack(id | null)`, `setQuality(id)`, `setTheme(theme)`, `setMarkers(markers)`, `enterFullscreen()`, `exitFullscreen()`, `enterPip()`, `next()`, `previous()`, `getState()`, `getTime()`, `getDuration()`, `getTracks()`, `getQualities()`, `loadSource(spec)`, `setSource(id)`, `getSources()`, `destroy()`.
 
 `player.ready` resolves with the `ready` event. `player.iframe` is the iframe element.
 
@@ -56,7 +68,7 @@ function Watch({ media }) {
 }
 ```
 
-Changing `media` loads it without recreating the iframe; changing `theme` calls `setTheme`. Changing `player` or `embedUrl` creates a new iframe.
+Changing `media` loads it without recreating the iframe; changing `source` calls `loadSource`; changing `theme` calls `setTheme`. Changing `player` or `embedUrl` creates a new iframe.
 
 ## embedSrc(options)
 

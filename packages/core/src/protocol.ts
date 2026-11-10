@@ -31,7 +31,13 @@ export const COMMANDS = {
   getTime: { args: "none", doc: "Returns the current time in seconds." },
   getDuration: { args: "none", doc: "Returns the duration in seconds." },
   getTracks: { args: "none", doc: "Returns { audio, subtitles, activeAudio, activeSubtitle }." },
-  getQualities: { args: "none", doc: "Returns { qualities, active }." }
+  getQualities: { args: "none", doc: "Returns { qualities, active }." },
+  loadSource: {
+    args: "object",
+    doc: "Play a catalogue title through the source registry. args: { tmdb | imdb, type: movie|tv, season?, episode?, title?, source? (preferred id), sources? (only these ids), start? }"
+  },
+  setSource: { args: "string", doc: "Switch to another source id from getSources(), keeping the position." },
+  getSources: { args: "none", doc: "Returns { active, sources: [{ id, name, mode, capabilities, score, stats }] }." }
 } as const satisfies Record<string, { args: ArgSpec; min?: number; max?: number; doc: string }>;
 
 export type CommandName = keyof typeof COMMANDS;
@@ -61,7 +67,10 @@ export const EVENTS = [
   "playerclass",
   "statechange",
   "exit",
-  "report"
+  "report",
+  "sources",
+  "sourcechange",
+  "sourcefail"
 ] as const;
 export type EventName = (typeof EVENTS)[number];
 

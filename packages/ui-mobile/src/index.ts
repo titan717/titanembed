@@ -17,6 +17,8 @@ import {
   skipGroup,
   sleepGroup,
   speedGroup,
+  sourceGroup,
+  type SourceMenu,
   subtitleGroup,
   t,
   text,
@@ -32,6 +34,8 @@ export interface MobileOptions {
   onReport?: (kind: string) => void;
   /** Show a back arrow in the top bar (the host handles `exit`). */
   showBack?: boolean;
+  /** Source switching (shown in Settings when there is more than one source). */
+  sources?: SourceMenu;
   hideAfter?: number;
 }
 
@@ -323,6 +327,7 @@ export class MobilePlayer {
       c.on("ready", () => {
         this.qualityBtn.hidden = c.qualities.length < 2;
         this.pipBtn.hidden = !c.canPip;
+        this.speedBtn.hidden = !c.canSetRate;
       })
     );
   }
@@ -480,7 +485,7 @@ export class MobilePlayer {
     };
     this.cancelHold();
     this.holdTimer = setTimeout(() => {
-      if (!this.drag || this.drag.kind !== "none" || this.core.state !== "playing") return;
+      if (!this.drag || this.drag.kind !== "none" || this.core.state !== "playing" || !this.core.canSetRate) return;
       this.holding = true;
       this.holdRate = this.core.rate;
       this.core.setRate(2);
@@ -811,12 +816,14 @@ export class MobilePlayer {
     } else {
       const sel = (g: MenuGroup) => g.options.find((o) => o.selected)?.label ?? "";
       const entries: [string, string, () => void][] = [
-        [t("speed"), sel(speedGroup(c)), () => this.sub(() => speedGroup(c))],
         [t("sleepTimer"), sel(sleepGroup(c)) || t("sleepOff"), () => this.sub(() => sleepGroup(c))],
         [t("captionStyle"), "", () => this.subCaptions()],
         [t("skipBehaviour"), sel(skipGroup(c)), () => this.sub(() => skipGroup(c))]
       ];
-      if (c.subtitleTrack) entries.splice(3, 0, [t("timing"), sel(timingGroup(c)), () => this.sub(() => timingGroup(c))]);
+      if (c.subtitleTrack) entries.splice(2, 0, [t("timing"), sel(timingGroup(c)), () => this.sub(() => timingGroup(c))]);
+      if (c.canSetRate) entries.unshift([t("speed"), sel(speedGroup(c)), () => this.sub(() => speedGroup(c))]);
+      const src = this.opts.sources;
+      if (src && src.list().length > 1) entries.unshift([t("source"), sel(sourceGroup(src)), () => this.sub(() => sourceGroup(src))]);
       this.frame(
         t("settings"),
         false,

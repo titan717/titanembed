@@ -1,11 +1,24 @@
 import "@fontsource-variable/inter/wght.css";
 import "./demo.css";
-import { createPlayer, VERSION, type MediaDescriptor, type PlayerClass, type TitanPlayer } from "@titan/sdk";
+import { createPlayer, VERSION, type MediaDescriptor, type PlayerClass, type SourceSpec, type TitanPlayer } from "@titan/sdk";
 import { mark } from "@titan/ui-common/icons";
 
 const $ = (id: string) => document.getElementById(id)!;
 const base = location.origin;
-const embedUrl = `${base}/embed/`;
+// Local test runs can point the embed at the loopback mock provider (tests/e2e/fixtures); never on a public host.
+const embedUrl = (() => {
+  const q = new URLSearchParams(location.search);
+  const u = new URL(`${base}/embed/`);
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && q.get("mock")) {
+    u.searchParams.set("mock", q.get("mock")!);
+    if (q.get("mockcfg")) u.searchParams.set("mockcfg", q.get("mockcfg")!);
+  }
+  return u.toString();
+})();
+// with the loopback mock, play only the mock sources so local runs never reach a real provider
+const mockIds = new URL(embedUrl).searchParams.has("mock")
+  ? (new URL(embedUrl).searchParams.get("mockcfg") ?? "mock").split(",").map((c) => c.split(".")[0]!)
+  : null;
 
 const MEDIA: { id: string; label: string; media: MediaDescriptor }[] = [
   {
@@ -91,8 +104,18 @@ const state = {
   device: DEVICES.find((d) => d.id === params.get("device"))?.id ?? "tv",
   media: MEDIA.find((m) => m.id === params.get("media"))?.id ?? "test",
   accent: "default",
-  tab: "iframe" as "iframe" | "sdk" | "react"
+  tab: "iframe" as "iframe" | "sdk" | "react",
+  // a catalogue title played through the source registry, or null for the sample videos
+  source: readSource(params)
 };
+
+function readSource(q: URLSearchParams): (Required<Pick<SourceSpec, "tmdb" | "type">> & { season?: number; episode?: number }) | null {
+  const id = q.get("tmdb") ?? "";
+  if (!/^\d{1,9}$/.test(id)) return null;
+  const type = q.get("type") === "tv" ? "tv" : "movie";
+  const n = (v: string | null, max: number) => (v && /^\d{1,4}$/.test(v) && Number(v) <= max ? Number(v) : 1);
+  return type === "tv" ? { tmdb: id, type, season: n(q.get("s"), 999), episode: n(q.get("e"), 9999) } : { tmdb: id, type };
+}
 
 $("brand-mark").appendChild(mark("brand-svg"));
 $("ver").textContent = `v${VERSION}`;
@@ -148,12 +171,25 @@ function mount() {
   const frame = $("frame");
   frame.style.aspectRatio = `${device.w} / ${device.h}`;
   frame.dataset.device = device.id;
+  const src = state.source;
+  const label = src ? `TMDB ${src.tmdb}${src.type === "tv" ? ` S${src.season} E${src.episode}` : ""}` : media.title;
   player = createPlayer(frame, {
     embedUrl,
-    media,
+    ...(src ? { source: src, ...(mockIds ? { sources: mockIds } : { preferredSource: "embedmaster" }) } : { media }),
     player: device.player,
     theme: accent ? { accent } : undefined,
-    title: `${media.title} — Titan Embed ${device.label} player`
+    title: `${label} — Titan Embed ${device.label} player`
+  });
+  let sourceName = "";
+  player.on("sourcechange", (d) => {
+    sourceName = d.name;
+    $("tmdb-msg").textContent = src ? `Loading from ${d.name}…` : "";
+  });
+  player.on("play", () => {
+    if (src && sourceName) $("tmdb-msg").textContent = `Playing from ${sourceName}.`;
+  });
+  player.on("sourcefail", (d) => {
+    $("tmdb-msg").textContent = d.next ? `${d.id} failed, trying ${d.next}…` : `No source could play ${label}. Try another ID.`;
   });
   player.on("*", (e) => {
     const { event, data } = e as unknown as { event: string; data: unknown };
@@ -179,10 +215,73 @@ seg(
   () => state.media,
   (id) => {
     state.media = id;
+    if (state.source) {
+      // leave catalogue mode: a media frame is sandboxed again, so it needs a new iframe
+      state.source = null;
+      $("tmdb-msg").textContent = "";
+      syncUrl();
+      mount();
+      return;
+    }
     void player?.load(current().media).catch((err: Error) => addLog("error", err.message));
     renderCode();
   }
 );
+
+/* ---------- play by TMDB ID ---------- */
+
+const form = $("tmdb-form") as HTMLFormElement;
+const idInput = $("tmdb-id") as HTMLInputElement;
+const typeSel = $("tmdb-type") as HTMLSelectElement;
+const sInput = $("tmdb-s") as HTMLInputElement;
+const eInput = $("tmdb-e") as HTMLInputElement;
+const syncType = () => {
+  const tv = typeSel.value === "tv";
+  $("tmdb-s-wrap").hidden = !tv;
+  $("tmdb-e-wrap").hidden = !tv;
+};
+if (state.source) {
+  idInput.value = String(state.source.tmdb);
+  typeSel.value = state.source.type;
+  if (state.source.season) sInput.value = String(state.source.season);
+  if (state.source.episode) eInput.value = String(state.source.episode);
+  for (const b of $("media").querySelectorAll("button")) b.setAttribute("aria-pressed", "false");
+}
+syncType();
+typeSel.addEventListener("change", syncType);
+idInput.addEventListener("input", () => idInput.removeAttribute("aria-invalid"));
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const q = new URLSearchParams({ tmdb: idInput.value.trim(), type: typeSel.value, s: sInput.value, e: eInput.value });
+  const next = readSource(q);
+  if (!next) {
+    idInput.setAttribute("aria-invalid", "true");
+    $("tmdb-msg").textContent = "Enter a TMDB ID: digits only, for example 550.";
+    idInput.focus();
+    return;
+  }
+  state.source = next;
+  $("tmdb-msg").textContent = "Finding a source…";
+  syncUrl();
+  // the media seg no longer reflects what plays
+  for (const b of $("media").querySelectorAll("button")) b.setAttribute("aria-pressed", "false");
+  mount();
+});
+
+function syncUrl() {
+  const u = new URL(location.href);
+  for (const k of ["tmdb", "type", "s", "e"]) u.searchParams.delete(k);
+  const src = state.source;
+  if (src) {
+    u.searchParams.set("tmdb", String(src.tmdb));
+    if (src.type === "tv") {
+      u.searchParams.set("type", "tv");
+      u.searchParams.set("s", String(src.season));
+      u.searchParams.set("e", String(src.episode));
+    }
+  }
+  history.replaceState(null, "", u);
+}
 seg(
   $("accent"),
   ACCENTS,
@@ -205,7 +304,8 @@ const CMDS: { label: string; run: (p: TitanPlayer) => Promise<unknown> }[] = [
   { label: "1.5×", run: (p) => p.setRate(1.5) },
   { label: "1×", run: (p) => p.setRate(1) },
   { label: "Get tracks", run: (p) => p.getTracks().then((t) => addLog("getTracks →", t)) },
-  { label: "Get qualities", run: (p) => p.getQualities().then((q) => addLog("getQualities →", q)) }
+  { label: "Get qualities", run: (p) => p.getQualities().then((q) => addLog("getQualities →", q)) },
+  { label: "Get sources", run: (p) => p.getSources().then((s) => addLog("getSources →", s)) }
 ];
 $("cmds").replaceChildren(
   ...CMDS.map((c) => {
@@ -233,19 +333,43 @@ seg(
 
 function renderCode() {
   const { device, media, accent } = current();
-  const src = media.sources[0]!.url;
+  const src = state.source;
+  const mediaSrc = media.sources[0]!.url;
+  const tv = src?.type === "tv";
   let code = "";
   if (state.tab === "iframe") {
-    const url = new URL(embedUrl);
-    url.searchParams.set("src", src);
-    url.searchParams.set("title", media.title);
+    const url = new URL(`${base}/embed/`);
+    if (src) {
+      url.searchParams.set("tmdb", String(src.tmdb));
+      if (tv) {
+        url.searchParams.set("type", "tv");
+        url.searchParams.set("s", String(src.season));
+        url.searchParams.set("e", String(src.episode));
+      }
+    } else {
+      url.searchParams.set("src", mediaSrc);
+      url.searchParams.set("title", media.title);
+    }
     url.searchParams.set("player", device.player);
     if (accent) url.searchParams.set("accent", accent.slice(1));
-    code = `<iframe\n  src="${url.toString().replace(/&/g, "&amp;")}"\n  title="${media.title}"\n  sandbox="allow-scripts allow-same-origin"\n  allow="autoplay; fullscreen; picture-in-picture; screen-wake-lock"\n  allowfullscreen\n  style="width:100%;aspect-ratio:16/9;border:0"\n></iframe>`;
+    // catalogue providers refuse a sandbox (inherited by nested frames); Titan keeps the provider inert instead
+    const sandbox = src ? "" : `\n  sandbox="allow-scripts allow-same-origin"`;
+    const title = src ? `TMDB ${src.tmdb}` : media.title;
+    code = `<iframe\n  src="${url.toString().replace(/&/g, "&amp;")}"\n  title="${title}"${sandbox}\n  allow="autoplay; fullscreen; picture-in-picture; encrypted-media; screen-wake-lock"\n  allowfullscreen\n  style="width:100%;aspect-ratio:16/9;border:0"\n></iframe>`;
+    if (src) code = `<!-- no sandbox attribute: sources such as EmbedMaster refuse to play in one -->\n${code}`;
   } else if (state.tab === "sdk") {
-    code = `import { createPlayer } from "titan-embed";\n\nconst player = createPlayer("#player", {\n  player: "${device.player}",${accent ? `\n  theme: { accent: "${accent}" },` : ""}\n  media: {\n    title: ${JSON.stringify(media.title)},\n    sources: [{ url: ${JSON.stringify(src)} }]\n  }\n});\n\nplayer.on("ended", () => player.next());`;
+    const what = src
+      ? `  source: { tmdb: ${JSON.stringify(String(src.tmdb))}${tv ? `, type: "tv", season: ${src.season}, episode: ${src.episode}` : ""} },\n  preferredSource: "embedmaster"`
+      : `  media: {\n    title: ${JSON.stringify(media.title)},\n    sources: [{ url: ${JSON.stringify(mediaSrc)} }]\n  }`;
+    const after = src
+      ? `player.on("sourcechange", ({ name }) => console.log("playing from", name));`
+      : `player.on("ended", () => player.next());`;
+    code = `import { createPlayer } from "titan-embed";\n\nconst player = createPlayer("#player", {\n  player: "${device.player}",${accent ? `\n  theme: { accent: "${accent}" },` : ""}\n${what}\n});\n\n${after}`;
   } else {
-    code = `import { TitanEmbed } from "titan-embed/react";\n\nexport function Watch() {\n  return (\n    <TitanEmbed\n      player="${device.player}"${accent ? `\n      theme={{ accent: "${accent}" }}` : ""}\n      media={{ title: ${JSON.stringify(media.title)}, sources: [{ url: ${JSON.stringify(src)} }] }}\n      onEnded={() => console.log("done")}\n    />\n  );\n}`;
+    const what = src
+      ? `source={{ tmdb: ${JSON.stringify(String(src.tmdb))}${tv ? `, type: "tv", season: ${src.season}, episode: ${src.episode}` : ""} }}\n      preferredSource="embedmaster"`
+      : `media={{ title: ${JSON.stringify(media.title)}, sources: [{ url: ${JSON.stringify(mediaSrc)} }] }}`;
+    code = `import { TitanEmbed } from "titan-embed/react";\n\nexport function Watch() {\n  return (\n    <TitanEmbed\n      player="${device.player}"${accent ? `\n      theme={{ accent: "${accent}" }}` : ""}\n      ${what}\n      onEnded={() => console.log("done")}\n    />\n  );\n}`;
   }
   $("code").textContent = code;
 }

@@ -6,5 +6,6 @@ export const alias = {
   "@titan/ui-tv": r("./packages/ui-tv/src"),
   "@titan/ui-mobile": r("./packages/ui-mobile/src"),
   "@titan/sdk": r("./packages/sdk/src"),
+  "@titan/sources": r("./packages/sources/src"),
   "@titan/embed": r("./packages/embed/src")
 };

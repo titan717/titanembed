@@ -20,7 +20,7 @@ import type Hls from "hls.js";
 import type { ErrorData, Level, MediaPlaylist } from "hls.js";
 
 export interface CoreEvents extends Record<string, unknown> {
-  statechange: { state: PlayerState; prev: PlayerState };
+  statechange: { state: PlayerState; from: PlayerState };
   ready: { duration: number };
   loadedmetadata: { duration: number; width: number; height: number };
   play: undefined;
@@ -143,7 +143,7 @@ export class TitanCore extends Emitter<CoreEvents> {
     };
     this.prefs = readPrefs();
     this.sm = new StateMachine((state, prev) => {
-      this.emit("statechange", { state, prev });
+      this.emit("statechange", { state, from: prev });
       this.updateMediaSession();
       this.updateWakeLock();
     });
@@ -236,6 +236,14 @@ export class TitanCore extends Emitter<CoreEvents> {
       (typeof document !== "undefined" && document.pictureInPictureElement === this.video) ||
       this.video.webkitPresentationMode === "picture-in-picture"
     );
+  }
+  /** False for provider sources that don't take a speed command; the UIs hide speed controls then. */
+  get canSetRate(): boolean {
+    return (this.video as unknown as { titanCaps?: { rate: boolean } }).titanCaps?.rate ?? true;
+  }
+  /** True while a provider iframe (not Titan's own <video>) is playing. */
+  get isProvider(): boolean {
+    return (this.video as unknown as { isProvider?: boolean }).isProvider === true;
   }
   get canPip(): boolean {
     return (
@@ -1149,7 +1157,8 @@ export class TitanCore extends Emitter<CoreEvents> {
       if (this.hls) return; // hls.js reports its own errors
       const code = v.error?.code;
       if (code === 2 /* MEDIA_ERR_NETWORK */) {
-        const delay = this.opts.backoff[this.retries];
+        // a provider frame that stopped can't be reloaded in place usefully; the source registry fails over instead
+        const delay = this.isProvider ? undefined : this.opts.backoff[this.retries];
         if (delay !== undefined) {
           this.retries++;
           const t = v.currentTime;

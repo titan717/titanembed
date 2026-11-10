@@ -10,6 +10,7 @@ export interface TitanEmbedProps extends PlayerOptions {
   onError?: (d: EventMap["error"]) => void;
   onExit?: (d: EventMap["exit"]) => void;
   onEvent?: (e: { event: string; data: unknown }) => void;
+  onSourceChange?: (d: EventMap["sourcechange"]) => void;
 }
 
 /**
@@ -22,6 +23,7 @@ export const TitanEmbed = forwardRef<TitanPlayer | null, TitanEmbedProps>(functi
   const cbs = useRef(props);
   cbs.current = props;
   const first = useRef(true);
+  const firstSource = useRef(true);
   useImperativeHandle(ref, () => player.current as TitanPlayer, []);
 
   useEffect(() => {
@@ -29,6 +31,7 @@ export const TitanEmbed = forwardRef<TitanPlayer | null, TitanEmbedProps>(functi
     const p = createPlayer(host.current, { ...cbs.current });
     player.current = p;
     first.current = true;
+    firstSource.current = true;
     const off = p.on("*", (e) => {
       const { event, data } = e as unknown as { event: string; data: unknown };
       const c = cbs.current;
@@ -38,13 +41,14 @@ export const TitanEmbed = forwardRef<TitanPlayer | null, TitanEmbedProps>(functi
       else if (event === "ended") c.onEnded?.();
       else if (event === "error") c.onError?.(data as EventMap["error"]);
       else if (event === "exit") c.onExit?.(data as EventMap["exit"]);
+      else if (event === "sourcechange") c.onSourceChange?.(data as EventMap["sourcechange"]);
     });
     return () => {
       off();
       p.destroy();
       player.current = null;
     };
-  }, [props.embedUrl, props.player]);
+  }, [props.embedUrl, props.player, props.sandbox ?? !props.source]);
 
   const mediaKey = props.media ? JSON.stringify(props.media) : "";
   useEffect(() => {
@@ -54,6 +58,19 @@ export const TitanEmbed = forwardRef<TitanPlayer | null, TitanEmbedProps>(functi
     }
     if (props.media) void player.current?.load(props.media, { autoplay: props.autoplay }).catch(() => undefined);
   }, [mediaKey]);
+
+  // a new catalogue title is sent with loadSource(), so the frame (and its sandbox decision) is kept
+  const sourceKey = props.source ? JSON.stringify([props.source, props.preferredSource, props.sources]) : "";
+  useEffect(() => {
+    if (firstSource.current) {
+      firstSource.current = false;
+      return;
+    }
+    if (props.source)
+      void player.current
+        ?.loadSource({ ...props.source, preferredSource: props.preferredSource, sources: props.sources })
+        .catch(() => undefined);
+  }, [sourceKey]);
 
   const themeKey = props.theme ? JSON.stringify(props.theme) : "";
   useEffect(() => {

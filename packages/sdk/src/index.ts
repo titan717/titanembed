@@ -54,6 +54,47 @@ export interface PlayerOptions {
   title?: string;
   /** Command timeout in milliseconds. Default 8000. */
   timeout?: number;
+  /**
+   * A title from a catalogue id, played through the source registry (docs/SOURCES.md) instead of `media`:
+   * `{ tmdb: "550" }`, `{ imdb: "tt0944947", type: "tv", season: 1, episode: 2 }`.
+   */
+  source?: SourceSpec;
+  /** Preferred source id (for example "embedmaster"); the registry falls back to the others automatically. */
+  preferredSource?: string;
+  /** Only these source ids, in the registry's ranking order. */
+  sources?: string[];
+  /**
+   * Sandbox the player iframe (`allow-scripts allow-same-origin`). Default: true for `media`, false when `source`
+   * is set, because sandbox flags are inherited by the provider frame inside and providers such as EmbedMaster
+   * refuse to play in a sandbox. Titan still isolates the provider (docs/SECURITY.md). Pass `false` if you call
+   * `loadSource()` later on a player created without `source`.
+   */
+  sandbox?: boolean;
+}
+
+/** A catalogue title for the source registry. */
+export interface SourceSpec {
+  tmdb?: string | number;
+  imdb?: string;
+  type?: "movie" | "tv";
+  season?: number;
+  episode?: number;
+  title?: string;
+  subtitle?: string;
+  poster?: string;
+  /** Start position in seconds. */
+  start?: number;
+}
+
+/** A source as reported by the registry, with the health measured in this viewer's browser. */
+export interface SourceInfo {
+  id: string;
+  name: string;
+  kind: "media" | "provider";
+  capabilities: string[];
+  mode: "driven" | "themed";
+  score: number;
+  stats: { ok: number; fail: number; ttff: number[]; popups: number; redirects: number; lastFail: number };
 }
 
 export interface EventMap {
@@ -82,6 +123,9 @@ export interface EventMap {
   statechange: { state: PlayerState; from: PlayerState };
   exit: { time: number };
   report: { kind: string; time: number; state: PlayerState; source: string | null };
+  sources: { active: string | null; sources: SourceInfo[] };
+  sourcechange: { id: string; name: string; mode: "driven" | "themed"; reason: string };
+  sourcefail: { id: string; reason: string; time: number; next: string | null };
 }
 
 type Handler<E extends EventName> = (data: E extends keyof EventMap ? EventMap[E] : unknown) => void;
@@ -111,6 +155,13 @@ export interface TitanPlayer {
   getDuration(): Promise<number>;
   getTracks(): Promise<{ audio: AudioTrack[]; subtitles: TextTrack[]; activeAudio: string | null; activeSubtitle: string | null }>;
   getQualities(): Promise<{ qualities: Quality[]; active: string }>;
+  /** Plays a catalogue title through the source registry (needs a frame without sandbox, see `sandbox`). */
+  loadSource(
+    source: SourceSpec & { preferredSource?: string; sources?: string[] }
+  ): Promise<{ active: string | null; sources: SourceInfo[] }>;
+  /** Switches to another source of the current title, keeping the position. */
+  setSource(id: string): Promise<{ active: string }>;
+  getSources(): Promise<{ active: string | null; sources: SourceInfo[] }>;
   on<E extends EventName>(event: E | "*", handler: Handler<E>): () => void;
   off<E extends EventName>(event: E | "*", handler: Handler<E>): void;
   destroy(): void;
@@ -122,6 +173,20 @@ let seq = 0;
 export function embedSrc(opts: PlayerOptions & { origins?: string[] } = {}): string {
   const u = new URL(opts.embedUrl ?? DEFAULT_EMBED_URL, typeof location !== "undefined" ? location.href : undefined);
   if (opts.media) u.searchParams.set("m", encode(opts.media));
+  const src = opts.source;
+  if (src) {
+    if (src.tmdb !== undefined) u.searchParams.set("tmdb", String(src.tmdb));
+    if (src.imdb) u.searchParams.set("imdb", src.imdb);
+    if (src.type) u.searchParams.set("type", src.type);
+    if (src.season !== undefined) u.searchParams.set("s", String(src.season));
+    if (src.episode !== undefined) u.searchParams.set("e", String(src.episode));
+    if (src.title) u.searchParams.set("title", src.title);
+    if (src.subtitle) u.searchParams.set("subtitle", src.subtitle);
+    if (src.poster) u.searchParams.set("poster", src.poster);
+    if (src.start !== undefined) u.searchParams.set("t", String(src.start));
+  }
+  if (opts.preferredSource) u.searchParams.set("source", opts.preferredSource);
+  if (opts.sources?.length) u.searchParams.set("sources", opts.sources.join(","));
   if (opts.player && opts.player !== "auto") u.searchParams.set("player", opts.player);
   if (opts.autoplay === false) u.searchParams.set("autoplay", "0");
   if (opts.lang) u.searchParams.set("lang", opts.lang);
@@ -145,7 +210,7 @@ function encode(d: unknown): string {
 }
 
 /**
- * Creates a Titan Embed player inside `container`. The player runs in a sandboxed iframe; this object talks to it
+ * Creates a Titan Embed player inside `container`. The player runs in an iframe (sandboxed for `media`); this object talks to it
  * over the versioned postMessage protocol and only accepts messages from that iframe's window and origin.
  */
 export function createPlayer(container: HTMLElement | string, options: PlayerOptions = {}): TitanPlayer {
@@ -158,7 +223,7 @@ export function createPlayer(container: HTMLElement | string, options: PlayerOpt
   const frame = document.createElement("iframe");
   frame.src = src;
   frame.title = options.title ?? "Video player";
-  frame.setAttribute("sandbox", "allow-scripts allow-same-origin");
+  if (options.sandbox ?? !options.source) frame.setAttribute("sandbox", "allow-scripts allow-same-origin");
   frame.allow = "autoplay; fullscreen; picture-in-picture; encrypted-media; screen-wake-lock";
   frame.setAttribute("allowfullscreen", "");
   frame.referrerPolicy = "strict-origin-when-cross-origin";
@@ -323,6 +388,16 @@ export function createPlayer(container: HTMLElement | string, options: PlayerOpt
     getDuration: () => send("getDuration"),
     getTracks: () => send("getTracks"),
     getQualities: () => send("getQualities"),
+    loadSource: (spec) => {
+      const { preferredSource, start, ...rest } = spec;
+      return send("loadSource", {
+        ...rest,
+        ...(start !== undefined ? { start } : {}),
+        ...(preferredSource ? { source: preferredSource } : {})
+      });
+    },
+    setSource: (id) => send("setSource", id),
+    getSources: () => send("getSources"),
     on(event, handler) {
       handlersAdd(event, handler as (d: unknown) => void);
       return () => player.off(event, handler);

@@ -17,20 +17,20 @@ Inspection date: 2026-11-10. Written before the first feature commit; updated ea
 
 ## Blueprints (Google Drive)
 
-| # | File | Status |
-| --- | --- | --- |
-| 1 | TV PLAYER | Downloaded (public link), rendered page by page. Always wins for Player A. |
-| 2 | Mobile | Downloaded. Contains app screens, no player screens → gap G-01. |
-| 3 | TV part 1 | Downloaded. |
-| 4 | TV part 2 | Downloaded. |
-| 5 | Newer | Downloaded. Identical to #6 (same bytes). |
-| 6 | TV | Downloaded. |
-| 7 | Another TV | Requires Google sign-in; not readable through the public link or the Drive connector at inspection time → gap G-02, retried every release. |
+| #   | File       | Status                                                                                                                                     |
+| --- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | TV PLAYER  | Downloaded (public link), rendered page by page. Always wins for Player A.                                                                 |
+| 2   | Mobile     | Downloaded. Contains app screens, no player screens → gap G-01.                                                                            |
+| 3   | TV part 1  | Downloaded.                                                                                                                                |
+| 4   | TV part 2  | Downloaded.                                                                                                                                |
+| 5   | Newer      | Downloaded. Identical to #6 (same bytes).                                                                                                  |
+| 6   | TV         | Downloaded.                                                                                                                                |
+| 7   | Another TV | Requires Google sign-in; not readable through the public link or the Drive connector at inspection time → gap G-02, retried every release. |
 
 Measurements are in `docs/BLUEPRINT_SPEC.md`; differences and missing pieces are in `docs/BLUEPRINT_GAPS.md`.
 
 ## Accounts and tooling
 
 - GitHub: `gh` authenticated as titan717. Actions available.
-- Vercel: CLI authenticated as titan717; project created on first deploy.
+- Vercel: CLI authenticated as titan717; the token currently lacks access to the `titan717s-projects` scope, so production deploys wait for reauthorization (D-024). GitHub Pages is the documented fallback.
 - npm: no publish token in this environment. The package is publish-ready (`packages/sdk`, provenance on); publishing runs from the release workflow once an `NPM_TOKEN` secret exists (D-019).

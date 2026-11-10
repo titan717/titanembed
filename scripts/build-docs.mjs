@@ -5,13 +5,18 @@ import { marked } from "marked";
 
 const SRC = "apps/docs";
 const OUT = "site/docs";
-const ORDER = ["index", "players", "api", "sdk", "theming", "security", "self-hosting", "assets"];
+const ORDER = ["index", "players", "api", "sdk", "sources", "theming", "security", "self-hosting", "assets"];
 
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-const slug = (s) => s.toLowerCase().replace(/<[^>]+>/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const slug = (s) =>
+  s
+    .toLowerCase()
+    .replace(/<[^>]+>/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 
 marked.use({
   renderer: {
@@ -33,9 +38,7 @@ const pages = readdirSync(SRC)
   .sort((a, b) => ORDER.indexOf(a.name) - ORDER.indexOf(b.name));
 
 for (const p of pages) {
-  const nav = pages
-    .map((q) => `<a href="${q.name}.html"${q.name === p.name ? ' aria-current="page"' : ""}>${esc(q.title)}</a>`)
-    .join("");
+  const nav = pages.map((q) => `<a href="${q.name}.html"${q.name === p.name ? ' aria-current="page"' : ""}>${esc(q.title)}</a>`).join("");
   const html = `<!doctype html>
 <html lang="en">
   <head>
@@ -52,7 +55,7 @@ for (const p of pages) {
     <div class="layout">
       <nav class="side" aria-label="Documentation">${nav}<a href="https://github.com/titan717/titanembed">GitHub</a></nav>
       <main id="content" class="prose">
-${String(marked.parse(p.body)).replaceAll("<pre>", "<pre tabindex=\"0\">")}
+${String(marked.parse(p.body)).replaceAll("<pre>", '<pre tabindex="0">')}
       </main>
     </div>
   </body>

@@ -16,6 +16,16 @@ export interface MenuGroup {
   select: (id: string) => void;
 }
 
+/** Source switching offered by the embed page (the registry's candidates for the current title). */
+export interface SourceMenu {
+  list(): MenuOption[];
+  pick(id: string): void;
+}
+
+export function sourceGroup(menu: SourceMenu): MenuGroup {
+  return { id: "source", title: t("source"), options: menu.list(), select: (id) => menu.pick(id) };
+}
+
 export const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 export const SLEEP = ["off", "15", "30", "45", "60", "episode"] as const;
 export const ISSUES = ["video", "audio", "subtitles", "quality"] as const;

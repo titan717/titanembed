@@ -4,7 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
-    <meta name="description" content="Titan Embed: an ad-free, embeddable video player with a 10-foot TV player for remotes and a touch-first mobile player." />
+    <meta
+      name="description"
+      content="Titan Embed: an ad-free, embeddable video player with a 10-foot TV player for remotes and a touch-first mobile player."
+    />
     <title>Titan Embed — a TV player and a mobile player in one embed</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   </head>
@@ -21,7 +24,10 @@
     <main id="main">
       <section class="intro">
         <h1>One embed. A TV player for the remote, a mobile player for the thumb.</h1>
-        <p class="lede">Titan Embed picks the right player for the screen it lands on. No ads, no trackers, no cookies — just HLS, MP4 and WebM with captions, audio tracks, skip markers and a typed postMessage API.</p>
+        <p class="lede">
+          Titan Embed picks the right player for the screen it lands on. No ads, no trackers, no cookies — just HLS, MP4 and WebM with
+          captions, audio tracks, skip markers and a typed postMessage API.
+        </p>
       </section>
 
       <section class="stage" aria-label="Live player">
@@ -39,6 +45,46 @@
             <div class="seg" id="accent"></div>
           </fieldset>
         </div>
+        <form class="tmdb" id="tmdb-form" novalidate aria-describedby="tmdb-note">
+          <fieldset>
+            <legend>Play a title by TMDB ID</legend>
+            <div class="tmdb-row">
+              <label class="field">
+                <span>TMDB ID</span>
+                <input
+                  id="tmdb-id"
+                  name="tmdb"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  pattern="[0-9]{1,9}"
+                  maxlength="9"
+                  placeholder="550"
+                  required
+                />
+              </label>
+              <label class="field">
+                <span>Type</span>
+                <select id="tmdb-type" name="type">
+                  <option value="movie">Movie</option>
+                  <option value="tv">TV episode</option>
+                </select>
+              </label>
+              <label class="field field-num" id="tmdb-s-wrap" hidden>
+                <span>Season</span>
+                <input id="tmdb-s" name="s" type="number" min="0" max="999" value="1" inputmode="numeric" />
+              </label>
+              <label class="field field-num" id="tmdb-e-wrap" hidden>
+                <span>Episode</span>
+                <input id="tmdb-e" name="e" type="number" min="0" max="9999" value="1" inputmode="numeric" />
+              </label>
+              <button class="play-btn" type="submit">Play title</button>
+            </div>
+            <p class="tmdb-note" id="tmdb-note">
+              Plays through the source registry, starting with EmbedMaster, inside Titan's own player UI.
+              <span class="tmdb-msg" id="tmdb-msg" role="status"></span>
+            </p>
+          </fieldset>
+        </form>
         <div class="frame-wrap" id="frame-wrap">
           <div class="frame" id="frame"></div>
         </div>
@@ -61,32 +107,50 @@
           </div>
           <div class="tabs" id="code-tabs" role="group" aria-label="Embed code format"></div>
           <pre class="code" tabindex="0" aria-label="Embed code"><code id="code"></code></pre>
-          <p class="small">The iframe needs <code>allow-scripts allow-same-origin</code> in its sandbox, and the commands only work for origins you list in <code>origins</code>. See <a href="/docs/security.html">Security</a>.</p>
+          <p class="small">
+            The iframe needs <code>allow-scripts allow-same-origin</code> in its sandbox, and the commands only work for origins you list in
+            <code>origins</code>. See <a href="/docs/security.html">Security</a>.
+          </p>
         </div>
       </section>
 
       <section class="features" aria-label="Features">
         <article>
           <h3>Player A · TV</h3>
-          <p>Built for the 10-foot view: D-pad focus with a visible scale, hidden seeking that adds up 10, 20, 30 and 60 seconds, Back that closes a panel before it exits, and key codes for Android TV, Fire TV, Tizen and webOS.</p>
+          <p>
+            Built for the 10-foot view: D-pad focus with a visible scale, hidden seeking that adds up 10, 20, 30 and 60 seconds, Back that
+            closes a panel before it exits, and key codes for Android TV, Fire TV, Tizen and webOS.
+          </p>
         </article>
         <article>
           <h3>Player B · Mobile</h3>
-          <p>Thumb-first: double-tap to skip 10 seconds, swipe to seek, slide for brightness and volume, hold for 2×, pinch to fill, a lock button, bottom sheets in portrait and safe areas everywhere.</p>
+          <p>
+            Thumb-first: double-tap to skip 10 seconds, swipe to seek, slide for brightness and volume, hold for 2×, pinch to fill, a lock
+            button, bottom sheets in portrait and safe areas everywhere.
+          </p>
         </article>
         <article>
           <h3>Shared core</h3>
-          <p>One state machine, HLS with hls.js loaded only when needed, quality and audio menus, a safe WebVTT and SRT parser, resume, intro, recap and credits skipping, and recovery from stalls.</p>
+          <p>
+            One state machine, HLS with hls.js loaded only when needed, quality and audio menus, a safe WebVTT and SRT parser, resume,
+            intro, recap and credits skipping, and recovery from stalls.
+          </p>
         </article>
         <article>
           <h3>Private by default</h3>
-          <p>No analytics, cookies or third-party scripts. Strict CSP, an origin allowlist for commands and a validated media descriptor that never inserts HTML.</p>
+          <p>
+            No analytics, cookies or third-party scripts. Strict CSP, an origin allowlist for commands and a validated media descriptor that
+            never inserts HTML.
+          </p>
         </article>
       </section>
     </main>
     <footer class="foot">
       <span>MIT licensed · <span id="ver"></span></span>
-      <span>Test media: Titan test clip (generated), Big Buck Bunny and Tears of Steel © Blender Foundation, CC BY. <a href="/docs/assets.html">Credits</a></span>
+      <span
+        >Test media: Titan test clip (generated), Big Buck Bunny and Tears of Steel © Blender Foundation, CC BY.
+        <a href="/docs/assets.html">Credits</a></span
+      >
     </footer>
     <script type="module" src="./demo.ts"></script>
   </body>

@@ -20,6 +20,8 @@ import {
   skipGroup,
   sleepGroup,
   speedGroup,
+  sourceGroup,
+  type SourceMenu,
   subtitleGroup,
   t,
   text,
@@ -37,6 +39,8 @@ export interface TvOptions {
   onReport?: (kind: string) => void;
   /** Hide the controls after this many ms of inactivity while playing (default 4500, blueprint 4–5 s). */
   hideAfter?: number;
+  /** Source switching (shown in Settings when there is more than one source). */
+  sources?: SourceMenu;
 }
 
 type PanelKind = "quality" | "audio" | "settings" | null;
@@ -720,13 +724,16 @@ export class TvPlayer {
     this.panelEl.setAttribute("aria-label", t("settings"));
     const sel = (g: MenuGroup) => g.options.find((o) => o.selected)?.label ?? "";
     const entries: { label: string; value: string; open: () => void }[] = [
-      { label: t("speed"), value: sel(speedGroup(c)), open: () => this.sub(() => speedGroup(c)) },
       { label: t("sleepTimer"), value: sel(sleepGroup(c)) || t("sleepOff"), open: () => this.sub(() => sleepGroup(c)) },
       { label: t("captionStyle"), value: "", open: () => this.subCaptions() },
       { label: t("skipBehaviour"), value: sel(skipGroup(c)), open: () => this.sub(() => skipGroup(c)) }
     ];
     if (c.subtitleTrack)
-      entries.splice(3, 0, { label: t("timing"), value: sel(timingGroup(c)), open: () => this.sub(() => timingGroup(c)) });
+      entries.splice(2, 0, { label: t("timing"), value: sel(timingGroup(c)), open: () => this.sub(() => timingGroup(c)) });
+    if (c.canSetRate) entries.unshift({ label: t("speed"), value: sel(speedGroup(c)), open: () => this.sub(() => speedGroup(c)) });
+    const src = this.opts.sources;
+    if (src && src.list().length > 1)
+      entries.unshift({ label: t("source"), value: sel(sourceGroup(src)), open: () => this.sub(() => sourceGroup(src)) });
     const rows = entries.map((e) => {
       const b = h(
         "button",
